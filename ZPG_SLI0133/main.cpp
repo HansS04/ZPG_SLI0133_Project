@@ -6,7 +6,7 @@
 int main() {
     try {
         Application app(1024, 728, "OpenGL Scenes");
-        app.run();
+        app.start();
     }
     catch (const std::exception& e) {
         std::cerr << "Fatal Error: " << e.what() << std::endl;

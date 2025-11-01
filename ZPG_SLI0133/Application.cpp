@@ -1,7 +1,8 @@
 #include "Application.h"
 #include "Scene.h"
 #include "DrawableObject.h" 
-#include "InputController.h" 
+#include "InputController.h"
+#include "Render.h" // Include pro Render
 #include "Camera.h"
 #include "Shader.h"
 #include <stdexcept>
@@ -22,6 +23,7 @@
 #include "bench.h" 
 #include "sphere.h"
 
+// Externí promìnné (ponecháno)
 extern const float SPHERE_VERTICES[];
 extern const size_t SPHERE_VERTICES_SIZE;
 extern const float PLAIN_VERTICES[];
@@ -39,7 +41,7 @@ const float TEST_TRIANGLE[] = {
 const size_t TEST_TRIANGLE_SIZE = sizeof(TEST_TRIANGLE);
 
 
-// --- Statické adaptéry pro GLFW ---
+// --- Statické adaptéry pro GLFW (ponecháno) ---
 static void key_callback_adapter(GLFWwindow* w, int k, int s, int a, int m) {
     auto* app = static_cast<Application*>(glfwGetWindowUserPointer(w));
     if (app) app->getController()->onKey(k, s, a, m);
@@ -62,9 +64,7 @@ Application::Application(int width, int height, const std::string& title) {
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
 
-    // OPRAVA CHYBY: glfwSetErrorCallback se musí volat pøed createWindow
     glfwSetErrorCallback(error_callback);
-
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -76,14 +76,10 @@ Application::Application(int width, int height, const std::string& title) {
     }
 
     glfwMakeContextCurrent(window);
-
     m_InputController = std::make_unique<InputController>(*this, window, width / 2.0f, height / 2.0f);
-
     glfwSetWindowUserPointer(window, this);
 
-    // Registrace callbackù
     glfwSetFramebufferSizeCallback(window, size_callback);
-
     glfwSetKeyCallback(window, key_callback_adapter);
     glfwSetMouseButtonCallback(window, mouse_button_callback_adapter);
     glfwSetCursorPosCallback(window, cursor_position_callback_adapter);
@@ -100,30 +96,20 @@ Application::Application(int width, int height, const std::string& title) {
 
     setupScenes();
     loadScene(0);
+
+    // Vytvoøíme Render až na konci
+    m_Render = std::make_unique<Render>(*this);
 }
 
 Application::~Application() {
     glfwTerminate();
 }
 
-void Application::run() {
-    float lastTime = 0.0f;
-    while (!glfwWindowShouldClose(window)) {
-        float currentTime = (float)glfwGetTime();
-        float deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
-
-        m_InputController->processPollingInput(deltaTime);
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        if (scene) {
-            scene->update(deltaTime, currentScene);
-            scene->render();
-        }
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+// METODA start() - OPRAVENA
+void Application::start() {
+    if (m_Render) {
+        // OPRAVA CHYBY: Musí být '->' (šipka), ne '.' (teèka)
+        m_Render->run();
     }
 }
 
@@ -133,16 +119,12 @@ void Application::error_callback(int error, const char* description) {
 
 void Application::size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
-
     Application* app = static_cast<Application*>(glfwGetWindowUserPointer(window));
-
     if (app && app->scene && height > 0) {
         app->scene->getCamera().setAspectRatio((float)width, (float)height);
         app->scene->getCamera().updateMatrices();
     }
 }
-
-// --- ZBYTEK SOUBORU ZÙSTÁVÁ BEZE ZMÌNY ---
 
 void Application::setupScenes() {
     sceneInitializers.push_back([this](Scene* s) { setupScene0(s); });
@@ -153,17 +135,15 @@ void Application::setupScenes() {
 
 void Application::loadScene(int index) {
     if (index == currentScene) return;
-
     if (index >= 0 && index < sceneInitializers.size()) {
         scene = std::make_unique<Scene>();
         scene->createShaders("basic_vertexShader.vert", "basic_Phong_fragmentShader.frag");
-
         sceneInitializers[index](scene.get());
-
         currentScene = index;
         std::cout << "Nactena scena: " << index << std::endl;
     }
 }
+
 
 void Application::setupScene0(Scene* s) {
     s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -212,6 +192,7 @@ void Application::setupScene1(Scene* scene) {
     scene->getCamera().updateMatrices();
 }
 
+// Použití vašich upravených hodnot
 float SCALE_EARTH = 1.2f;
 float SCALE_MOON = SCALE_EARTH / 5.0f;
 float EARTH_SUN_DISTANCE = 15.0f;
@@ -233,11 +214,11 @@ void Application::setupScene2(Scene* scene) {
     scene->getLight().setColor(glm::vec3(10.0f, 10.0f, 10.0f));
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, COLOR_EARTH);
     DrawableObject* earth = scene->getObject(scene->getObjectCount() - 1);
-    earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
+    earth->getTransformation().scale(glm::vec3(SCALE_EARTH)); // Použije vaši hodnotu 1.2f
     earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, COLOR_MOON);
     DrawableObject* moon = scene->getObject(scene->getObjectCount() - 1);
-    moon->getTransformation().scale(glm::vec3(SCALE_MOON));
+    moon->getTransformation().scale(glm::vec3(SCALE_MOON)); // Použije vaši spoèítanou hodnotu
     moon->getTransformation().translate(glm::vec3(MOON_EARTH_DISTANCE, 0.0f, 0.0f));
     scene->getCamera().setPosition(glm::vec3(EARTH_SUN_DISTANCE + 5.0f, 3.0f, 5.0f));
     scene->getCamera().setFi(glm::radians(-180.0f));

@@ -68,6 +68,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
+    <ClCompile Include="Render.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -104,6 +107,9 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="Transformation.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>
