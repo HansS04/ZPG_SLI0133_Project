@@ -6,8 +6,9 @@
 
 Camera::Camera(glm::vec3 startPosition)
     : position(startPosition),
-    up(glm::vec3(0.0f, 1.0f, 0.0f)),
     target(glm::vec3(0.0f, 0.0f, -1.0f)),
+    right(glm::vec3(1.0f, 0.0f, 0.0f)),
+    up(glm::vec3(0.0f, 1.0f, 0.0f)),
     alpha(glm::radians(PITCH_DEFAULT)),
     fi(glm::radians(YAW_DEFAULT)),
     fov(glm::radians(45.0f)),
@@ -39,6 +40,11 @@ void Camera::updateMatrices() {
     target.y = sin(alpha);
     target.z = sin(fi) * cos(alpha);
     target = glm::normalize(target);
+
+    glm::vec3 globalUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    right = glm::normalize(glm::cross(target, globalUp));
+    up = glm::normalize(glm::cross(right, target));
+
     viewMatrix = glm::lookAt(position, position + target, up);
 
     projectionMatrix = glm::perspective(fov, aspectRatio, nearPlane, farPlane);

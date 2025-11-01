@@ -5,13 +5,15 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "ICameraObserver.h" 
-#include "ILightObserver.h" 
+// ILightObserver.h je odstranìn
 
 class Shader;
 class Camera;
-class Light;
+struct DirLight;
+class PointLight;
+struct SpotLight;
 
-class ShaderProgram : public ICameraObserver, public ILightObserver {
+class ShaderProgram : public ICameraObserver {
 private:
     GLuint ID;
     std::unique_ptr<Shader> vs, fs;
@@ -24,13 +26,12 @@ private:
     GLint getUniformLocation(const std::string& name) const;
 
 public:
-    static const int MAX_ADDITIONAL_LIGHTS = 8;
+    static const int MAX_POINT_LIGHTS = 8;
 
     ShaderProgram(Shader& vs, Shader& fs);
     ~ShaderProgram();
 
     void update(Camera* cam) override;
-    void onLightChanged(const Light* light) override;
 
     void use() const;
 
@@ -39,9 +40,12 @@ public:
     void setVec3(const std::string& name, const glm::vec3& vec) const;
     void setFloat(const std::string& name, float value) const;
     void setInt(const std::string& name, int value) const;
+    void setBool(const std::string& name, bool value) const;
 
-    void setLightUniforms(const Light& light) const;
-    void setAdditionalLights(const std::vector<std::unique_ptr<Light>>& lights) const;
+    void setAmbientLight(const glm::vec3& color) const;
+    void setDirLight(const DirLight& light, bool on) const;
+    void setPointLights(const std::vector<std::unique_ptr<PointLight>>& lights) const;
+    void setFlashlight(const SpotLight& light, bool on) const;
 
     const glm::mat4& getViewMatrix() const { return cachedViewMatrix; }
     const glm::mat4& getProjectionMatrix() const { return cachedProjectionMatrix; }

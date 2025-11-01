@@ -14,6 +14,7 @@ private:
     glm::vec3 position;
     glm::vec3 target;
     glm::vec3 up;
+    glm::vec3 right;
 
     float alpha;
     float fi;
@@ -39,6 +40,10 @@ public:
 
     void setPosition(const glm::vec3& newPos) { position = newPos; }
     const glm::vec3& getPosition() const { return position; }
+
+    const glm::vec3& getFrontVector() const { return target; }
+    const glm::vec3& getRightVector() const { return right; }
+    const glm::vec3& getUpVector() const { return up; }
 
     void setAlpha(float newAlpha) { alpha = newAlpha; }
     float getAlpha() const { return alpha; }

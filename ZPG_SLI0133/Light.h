@@ -1,11 +1,20 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <vector>
-#include <algorithm> // Pro std::remove
-#include "ILightObserver.h" // Zahrnutí rozhraní
 
-class Light {
-private:
+/**
+ * @brief Smìrové svìtlo (Slunce, Mìsíc). Nemá pozici, jen smìr.
+ */
+struct DirLight {
+    glm::vec3 direction;
+    glm::vec3 color;
+};
+
+/**
+ * @brief Bodové svìtlo (žárovka, svìtluška). Má pozici a útlum.
+ * Toto je vaše pùvodní tøída Light, pøejmenovaná a zjednodušená.
+ */
+class PointLight {
+public:
     glm::vec3 position;
     glm::vec3 color;
 
@@ -13,31 +22,23 @@ private:
     float linear;
     float quadratic;
 
-    // Seznam pozorovatelù
-    std::vector<ILightObserver*> m_Observers;
+    PointLight(const glm::vec3& pos, const glm::vec3& col, float con = 1.0f, float lin = 0.09f, float quad = 0.032f)
+        : position(pos), color(col), constant(con), linear(lin), quadratic(quad) {
+    }
+};
 
-    // Soukromá metoda pro informování všech
-    void notify() const;
+/**
+ * @brief Reflektor (baterka). Je to bodové svìtlo s kuželem.
+ */
+struct SpotLight {
+    glm::vec3 position;
+    glm::vec3 direction;
+    glm::vec3 color;
 
-public:
-    Light(const glm::vec3& pos = glm::vec3(0.0f, 2.5f, -9.0f),
-        const glm::vec3& col = glm::vec3(1.0f, 1.0f, 1.0f),
-        float con = 1.0f,
-        float lin = 0.09f,
-        float quad = 0.032f);
+    float constant;
+    float linear;
+    float quadratic;
 
-    // Gettery
-    const glm::vec3& getPosition() const { return position; }
-    const glm::vec3& getColor() const { return color; }
-    float getConstant() const { return constant; }
-    float getLinear() const { return linear; }
-    float getQuadratic() const { return quadratic; }
-
-    // Settery (volají notify)
-    void setPosition(const glm::vec3& pos);
-    void setColor(const glm::vec3& col);
-
-    // Metody pro správu pozorovatelù
-    void attach(ILightObserver* observer);
-    void detach(ILightObserver* observer);
+    float cutOff; // Vnitøní úhel (cos)
+    float outerCutOff; // Vnìjší úhel (cos)
 };

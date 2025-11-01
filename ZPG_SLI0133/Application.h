@@ -8,13 +8,14 @@
 #include <vector>
 #include <functional> 
 #include <array>
+#include <random> 
 #include "Scene.h" 
-#include "Transformation.h"
+#include "TransformationComposite.h"
 
 class Scene;
 class DrawableObject;
 class InputController;
-class Render; // Dopøedná deklarace pro Render
+class Render;
 
 extern float rotationSpeed;
 extern float rotationAngle;
@@ -25,15 +26,16 @@ private:
     GLFWwindow* window;
     std::unique_ptr<Scene> scene;
     std::unique_ptr<InputController> m_InputController;
-    std::unique_ptr<Render> m_Render; // Váš Render (døíve Engine)
+    std::unique_ptr<Render> m_Render;
 
     std::vector<std::function<void(Scene*)>> sceneInitializers;
     int currentScene = -1;
 
+    std::mt19937 m_RandomEngine;
+
 private:
     void setupScenes();
 
-    // TOTO JSTE PRAVDÌPODOBNÌ SMAZAL - OPRAVA CHYBY "setupScene0 is undefined"
     void setupScene0(Scene* scene);
     void setupScene1(Scene* scene);
     void setupScene2(Scene* scene);

@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <string>
 #include "DrawableObject.h" 
 #include "Camera.h" 
@@ -11,7 +10,6 @@
 class DrawableObject;
 class ShaderProgram;
 class Camera;
-class Light;
 
 class Scene {
 private:
@@ -19,11 +17,16 @@ private:
     std::shared_ptr<ShaderProgram> colorShaderProgram;
     std::unique_ptr<Camera> camera;
 
-    std::unique_ptr<Light> pointLight;
+    glm::vec3 m_AmbientLightColor;
+    std::unique_ptr<DirLight> m_DirLight;
+    bool m_DirLightOn;
 
-    std::vector<std::unique_ptr<Light>> m_AdditionalLights;
-    std::vector<glm::vec3> m_AdditionalLightBasePositions;
+    std::vector<std::unique_ptr<PointLight>> m_PointLights;
+    std::vector<glm::vec3> m_PointLightBasePositions;
     float m_FireflyTime;
+
+    std::unique_ptr<SpotLight> m_Flashlight;
+    bool m_FlashlightOn;
 
 public:
     Scene();
@@ -39,11 +42,10 @@ public:
     DrawableObject* getObject(size_t index);
 
     Camera& getCamera() { return *camera; }
-    const Camera& getCamera() const { return *camera; }
 
-    Light& getLight() { return *pointLight; }
-    const Light& getLight() const { return *pointLight; }
+    void setAmbientLight(const glm::vec3& color);
+    void setDirLight(const glm::vec3& direction, const glm::vec3& color, bool on = true);
+    PointLight* addPointLight(const glm::vec3& pos, const glm::vec3& col, float con, float lin, float quad);
 
-    Light* addAdditionalLight(const glm::vec3& pos, const glm::vec3& col, float constant, float linear, float quadratic);
-    const std::vector<std::unique_ptr<Light>>& getAdditionalLights() const { return m_AdditionalLights; }
+    void toggleFlashlight();
 };

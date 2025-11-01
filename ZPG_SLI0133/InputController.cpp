@@ -1,5 +1,5 @@
 #include "InputController.h"
-#include "Scene.h" 
+#include "Scene.h"  
 #include "Camera.h" 
 #include <glm/gtc/constants.hpp>
 #include <iostream>
@@ -7,7 +7,6 @@
 InputController::InputController(Application& app, GLFWwindow* window, float initialX, float initialY)
     : m_App(app), m_Window(window), m_LastX(initialX), m_LastY(initialY) {
 }
-
 
 void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -32,8 +31,13 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
 }
 
-
 void InputController::onKey(int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        Scene* scene = m_App.getActiveScene();
+        if (scene) {
+            scene->toggleFlashlight();
+        }
+    }
 }
 
 void InputController::onMouseButton(int button, int action, int mods) {
@@ -71,7 +75,6 @@ void InputController::onCursorPos(double xpos, double ypos) {
 void InputController::onScroll(double xoffset, double yoffset) {
     processCameraScroll((float)yoffset);
 }
-
 
 void InputController::processCameraMouse(float xoffset, float yoffset, bool constrainPitch) {
     Scene* scene = m_App.getActiveScene();

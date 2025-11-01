@@ -9,10 +9,8 @@
 
 ShaderProgram::ShaderProgram(Shader& vs, Shader& fs) {
     ID = glCreateProgram();
-
     vs.attachShader(ID);
     fs.attachShader(ID);
-
     glLinkProgram(ID);
     checkLinkErrors();
 }
@@ -40,8 +38,6 @@ void ShaderProgram::checkLinkErrors() {
 
 GLint ShaderProgram::getUniformLocation(const std::string& name) const {
     GLint location = glGetUniformLocation(ID, name.c_str());
-    if (location == -1) {
-    }
     return location;
 }
 
@@ -49,13 +45,6 @@ void ShaderProgram::update(Camera* cam) {
     if (cam) {
         cachedViewMatrix = cam->getViewMatrix();
         cachedProjectionMatrix = cam->getProjectionMatrix();
-    }
-}
-
-void ShaderProgram::onLightChanged(const Light* light) {
-    if (light) {
-        this->use();
-        this->setLightUniforms(*light);
     }
 }
 
@@ -80,34 +69,50 @@ void ShaderProgram::setInt(const std::string& name, int value) const {
     glUniform1i(getUniformLocation(name), value);
 }
 
-void ShaderProgram::setLightUniforms(const Light& light) const {
-    setVec3("u_PointLight.position", light.getPosition());
-    setVec3("u_PointLight.color", light.getColor());
-
-    setFloat("u_PointLight.constant", light.getConstant());
-    setFloat("u_PointLight.linear", light.getLinear());
-    setFloat("u_PointLight.quadratic", light.getQuadratic());
+void ShaderProgram::setBool(const std::string& name, bool value) const {
+    glUniform1i(getUniformLocation(name), (int)value);
 }
 
-void ShaderProgram::setAdditionalLights(const std::vector<std::unique_ptr<Light>>& lights) const {
+void ShaderProgram::setAmbientLight(const glm::vec3& color) const {
+    setVec3("u_AmbientLight", color);
+}
 
+void ShaderProgram::setDirLight(const DirLight& light, bool on) const {
+    setBool("u_DirLightOn", on);
+    setVec3("u_DirLight.direction", light.direction);
+    setVec3("u_DirLight.color", light.color);
+}
+
+void ShaderProgram::setFlashlight(const SpotLight& light, bool on) const {
+    setBool("u_FlashlightOn", on);
+    setVec3("u_Flashlight.position", light.position);
+    setVec3("u_Flashlight.direction", light.direction);
+    setVec3("u_Flashlight.color", light.color);
+    setFloat("u_Flashlight.constant", light.constant);
+    setFloat("u_Flashlight.linear", light.linear);
+    setFloat("u_Flashlight.quadratic", light.quadratic);
+    setFloat("u_Flashlight.cutOff", light.cutOff);
+    setFloat("u_Flashlight.outerCutOff", light.outerCutOff);
+}
+
+void ShaderProgram::setPointLights(const std::vector<std::unique_ptr<PointLight>>& lights) const {
     int lightCount = static_cast<int>(lights.size());
-    if (lightCount > MAX_ADDITIONAL_LIGHTS) {
-        std::cerr << "Varovani: Pocet dalsich svetel (" << lights.size()
-            << ") prekracuje shader limit (" << MAX_ADDITIONAL_LIGHTS << ")." << std::endl;
-        lightCount = MAX_ADDITIONAL_LIGHTS;
+    if (lightCount > MAX_POINT_LIGHTS) {
+        std::cerr << "Varovani: Pocet bodovych svetel (" << lights.size()
+            << ") prekracuje shader limit (" << MAX_POINT_LIGHTS << ")." << std::endl;
+        lightCount = MAX_POINT_LIGHTS;
     }
 
-    setInt("u_AdditionalLightCount", lightCount);
+    setInt("u_PointLightCount", lightCount);
 
     for (int i = 0; i < lightCount; ++i) {
         const auto& light = lights[i];
-        std::string baseName = "u_AdditionalLights[" + std::to_string(i) + "].";
+        std::string baseName = "u_PointLights[" + std::to_string(i) + "].";
 
-        setVec3(baseName + "position", light->getPosition());
-        setVec3(baseName + "color", light->getColor());
-        setFloat(baseName + "constant", light->getConstant());
-        setFloat(baseName + "linear", light->getLinear());
-        setFloat(baseName + "quadratic", light->getQuadratic());
+        setVec3(baseName + "position", light->position);
+        setVec3(baseName + "color", light->color);
+        setFloat(baseName + "constant", light->constant);
+        setFloat(baseName + "linear", light->linear);
+        setFloat(baseName + "quadratic", light->quadratic);
     }
 }
