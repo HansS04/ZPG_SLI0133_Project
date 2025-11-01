@@ -38,9 +38,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
-    <ClCompile Include="CameraController.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
     <ClCompile Include="DrawableObject.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
@@ -62,13 +59,16 @@
     <ClCompile Include="ShaderProgram.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
-    <ClCompile Include="Transformation.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
     <ClCompile Include="Render.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationLeafs.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformationComposite.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,9 +77,6 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraController.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="DrawableObject.h">
@@ -106,10 +103,19 @@
     <ClInclude Include="ShaderProgram.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
-    <ClInclude Include="Transformation.h">
+    <ClInclude Include="Render.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
-    <ClInclude Include="Render.h">
+    <ClInclude Include="ILightObserver.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationComponent.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationLeafs.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformationComposite.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>

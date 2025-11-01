@@ -52,6 +52,13 @@ void ShaderProgram::update(Camera* cam) {
     }
 }
 
+void ShaderProgram::onLightChanged(const Light* light) {
+    if (light) {
+        this->use();
+        this->setLightUniforms(*light);
+    }
+}
+
 void ShaderProgram::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
 }

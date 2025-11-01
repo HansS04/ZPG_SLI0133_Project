@@ -3,6 +3,7 @@
 #include "DrawableObject.h" 
 #include "InputController.h"
 #include "Render.h" // Include pro Render
+#include "TransformationComposite.h"
 #include "Camera.h"
 #include "Shader.h"
 #include <stdexcept>
