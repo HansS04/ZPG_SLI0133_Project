@@ -3,19 +3,20 @@
 Light::Light(const glm::vec3& pos, const glm::vec3& col, float con, float lin, float quad)
     : position(pos), color(col), constant(con), linear(lin), quadratic(quad)
 {
+    // m_Observers je automaticky prázdný
 }
 
 void Light::setPosition(const glm::vec3& pos) {
     if (position != pos) {
         position = pos;
-        notify(); 
+        notify(); // Informuj pozorovatele o zmìnì
     }
 }
 
 void Light::setColor(const glm::vec3& col) {
     if (color != col) {
         color = col;
-        notify(); 
+        notify(); // Informuj pozorovatele o zmìnì
     }
 }
 

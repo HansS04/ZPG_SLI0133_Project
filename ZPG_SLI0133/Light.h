@@ -1,8 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
-#include <algorithm>
-#include "ILightObserver.h" 
+#include <algorithm> // Pro std::remove
+#include "ILightObserver.h" // Zahrnutí rozhraní
 
 class Light {
 private:
@@ -13,7 +13,10 @@ private:
     float linear;
     float quadratic;
 
+    // Seznam pozorovatelù
     std::vector<ILightObserver*> m_Observers;
+
+    // Soukromá metoda pro informování všech
     void notify() const;
 
 public:
@@ -23,15 +26,18 @@ public:
         float lin = 0.09f,
         float quad = 0.032f);
 
+    // Gettery
     const glm::vec3& getPosition() const { return position; }
     const glm::vec3& getColor() const { return color; }
     float getConstant() const { return constant; }
     float getLinear() const { return linear; }
     float getQuadratic() const { return quadratic; }
 
+    // Settery (volají notify)
     void setPosition(const glm::vec3& pos);
     void setColor(const glm::vec3& col);
 
+    // Metody pro správu pozorovatelù
     void attach(ILightObserver* observer);
     void detach(ILightObserver* observer);
-}; 
+};

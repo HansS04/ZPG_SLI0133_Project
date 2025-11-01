@@ -2,9 +2,7 @@
 #include "TransformationComponent.h"
 #include <glm/vec3.hpp>
 
-/**
- * @brief Transformace rotace (Leaf).
- */
+
 class RotationTransformation : public TransformationComponent {
 private:
     float angle;
@@ -14,9 +12,7 @@ public:
     glm::mat4 apply(const glm::mat4& matrix) const override;
 };
 
-/**
- * @brief Transformace posunu (Leaf).
- */
+
 class TranslationTransformation : public TransformationComponent {
 private:
     glm::vec3 translationVector;
@@ -25,9 +21,7 @@ public:
     glm::mat4 apply(const glm::mat4& matrix) const override;
 };
 
-/**
- * @brief Transformace zmìny mìøítka (Leaf).
- */
+
 class ScaleTransformation : public TransformationComponent {
 private:
     glm::vec3 scaleVector;

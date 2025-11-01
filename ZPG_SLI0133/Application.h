@@ -49,9 +49,8 @@ public:
     Application(int width, int height, const std::string& title);
     ~Application();
 
-    void start(); // Metoda pro spuštìní
+    void start();
 
-    // Gettery, které Render potøebuje
     Scene* getActiveScene() { return scene.get(); }
     GLFWwindow* getWindow() { return window; }
     InputController* getController() { return m_InputController.get(); }

@@ -1,18 +1,14 @@
 #include "InputController.h"
-#include "Scene.h"  // Pro pøístup ke kameøe
-#include "Camera.h" // Pro pøístup ke kameøe
+#include "Scene.h" 
+#include "Camera.h" 
 #include <glm/gtc/constants.hpp>
 #include <iostream>
 
-// --- Konstruktor ---
 InputController::InputController(Application& app, GLFWwindow* window, float initialX, float initialY)
     : m_App(app), m_Window(window), m_LastX(initialX), m_LastY(initialY) {
 }
 
-// --- Zde NEJSOU žádné statické adaptéry ---
 
-
-// --- Logika z Application::processInput ---
 void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_Window, true);
@@ -20,8 +16,6 @@ void InputController::processPollingInput(float deltaTime) {
     Scene* scene = m_App.getActiveScene();
     if (!scene) return;
 
-    // Ovládání pohybu kamery
-    // Pøidal jsem násobiè rychlosti, upravte si ho
     const float cameraSpeed = 5.0f * deltaTime;
     if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS)
         processCameraKeyboard(CameraMovement::FORWARD, cameraSpeed);
@@ -32,21 +26,17 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS)
         processCameraKeyboard(CameraMovement::RIGHT, cameraSpeed);
 
-    // Ovládání aplikace (zmìna scén)
     if (glfwGetKey(m_Window, GLFW_KEY_1) == GLFW_PRESS) m_App.loadScene(1);
     if (glfwGetKey(m_Window, GLFW_KEY_2) == GLFW_PRESS) m_App.loadScene(2);
     if (glfwGetKey(m_Window, GLFW_KEY_3) == GLFW_PRESS) m_App.loadScene(3);
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
 }
 
-// --- Logika z Application callbackù (Eventy) ---
 
 void InputController::onKey(int key, int scancode, int action, int mods) {
-    // Pùvodní metoda v Application::key_callback byla prázdná.
 }
 
 void InputController::onMouseButton(int button, int action, int mods) {
-    // Toto je logika z Application::mouse_button_callback
     if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
             m_RightButtonPressed = true;
@@ -61,7 +51,6 @@ void InputController::onMouseButton(int button, int action, int mods) {
 }
 
 void InputController::onCursorPos(double xpos, double ypos) {
-    // Toto je logika z Application::cursor_position_callback
     if (m_FirstMouse) {
         m_LastX = (float)xpos;
         m_LastY = (float)ypos;
@@ -69,7 +58,7 @@ void InputController::onCursorPos(double xpos, double ypos) {
     }
 
     float xoffset = (float)xpos - m_LastX;
-    float yoffset = (float)ypos - m_LastY; // Opraveno: ypos - lastY
+    float yoffset = (float)ypos - m_LastY;
 
     m_LastX = (float)xpos;
     m_LastY = (float)ypos;
@@ -80,11 +69,9 @@ void InputController::onCursorPos(double xpos, double ypos) {
 }
 
 void InputController::onScroll(double xoffset, double yoffset) {
-    // Toto je logika z Application::scroll_callback
     processCameraScroll((float)yoffset);
 }
 
-// --- Logika zkopírovaná z CameraController.cpp ---
 
 void InputController::processCameraMouse(float xoffset, float yoffset, bool constrainPitch) {
     Scene* scene = m_App.getActiveScene();
@@ -95,7 +82,7 @@ void InputController::processCameraMouse(float xoffset, float yoffset, bool cons
     float alpha = camera.getAlpha();
 
     fi += glm::radians(xoffset * MOUSE_SENSITIVITY);
-    alpha += glm::radians(-yoffset * MOUSE_SENSITIVITY); // Y je invertované
+    alpha += glm::radians(-yoffset * MOUSE_SENSITIVITY);
 
     if (constrainPitch) {
         alpha = std::min(std::max(alpha, glm::radians(-89.0f)), glm::radians(89.0f));
@@ -113,7 +100,7 @@ void InputController::processCameraScroll(float yoffset) {
 
     float fov = camera.getFOV();
     if (yoffset != 0) {
-        fov -= glm::radians(yoffset * 1.0f); // Zoom se obvykle dìlá takto
+        fov -= glm::radians(yoffset * 1.0f);
         fov = std::min(std::max(fov, glm::radians(1.0f)), glm::radians(90.0f));
     }
 

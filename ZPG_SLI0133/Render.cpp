@@ -38,7 +38,6 @@ void Render::run() {
             scene->render();
         }
 
-        // 4. Výmìna bufferù a dotazování na události
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
