@@ -6,13 +6,13 @@
 #include <string>
 #include "DrawableObject.h" 
 #include "Camera.h" 
-#include "CameraController.h" 
+// #include "CameraController.h" // <- ODSTRANÌNO
 #include "Light.h"
 
 class DrawableObject;
 class ShaderProgram;
 class Camera;
-class CameraController;
+// class CameraController; // <- ODSTRANÌNO
 class Light;
 
 class Scene {
@@ -20,7 +20,7 @@ private:
     std::vector<std::unique_ptr<DrawableObject>> objects;
     std::shared_ptr<ShaderProgram> colorShaderProgram;
     std::unique_ptr<Camera> camera;
-    std::unique_ptr<CameraController> cameraController;
+    // std::unique_ptr<CameraController> cameraController; // <- ODSTRANÌNO
     std::unique_ptr<Light> pointLight;
 
 public:
@@ -38,7 +38,7 @@ public:
 
     Camera& getCamera() { return *camera; }
     const Camera& getCamera() const { return *camera; }
-    CameraController& getCameraController() { return *cameraController; }
+    // CameraController& getCameraController() { return *cameraController; } // <- ODSTRANÌNO
 
     Light& getLight() { return *pointLight; }
     const Light& getLight() const { return *pointLight; }

@@ -15,76 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Application.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Camera.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\CameraController.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\DrawableObject.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ICameraObserver.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Light.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Model.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Scene.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shader.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\ShaderProgram.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Transformation.h">
-      <Filter>Hlavičkové soubory</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\Application.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Camera.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\CameraController.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\DrawableObject.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\main.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Model.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Scene.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Shader.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\ShaderProgram.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Transformation.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Light.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="basic_Blinn_fragmentShader.frag">
       <Filter>Zdrojové soubory</Filter>
     </None>
@@ -100,5 +30,81 @@
     <None Include="basic_vertexShader.vert">
       <Filter>Zdrojové soubory</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Application.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraController.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawableObject.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="InputController.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderProgram.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Transformation.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraController.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawableObject.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="ICameraObserver.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="InputController.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderProgram.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Transformation.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

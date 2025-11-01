@@ -9,11 +9,11 @@
 #include <functional> 
 #include <array>
 #include "Scene.h" 
-#include "CameraController.h" 
 #include "Transformation.h"
 
 class Scene;
 class DrawableObject;
+class InputController; // Dopøedná deklarace
 
 extern float rotationSpeed;
 extern float rotationAngle;
@@ -23,33 +23,19 @@ class Application {
 private:
     GLFWwindow* window;
     std::unique_ptr<Scene> scene;
+    std::unique_ptr<InputController> m_InputController;
 
     std::vector<std::function<void(Scene*)>> sceneInitializers;
     int currentScene = -1;
 
 private:
-    bool firstMouse = true;
-    float lastX = 1024.0f / 2.0f;
-    float lastY = 768.0f / 2.0f;
-    bool rightButtonPressed = false;
-
     void setupScenes();
-    void loadScene(int index);
-
     void setupScene0(Scene* scene);
     void setupScene1(Scene* scene);
     void setupScene2(Scene* scene);
     void setupScene3(Scene* scene);
-
-private:
-    void processInput(GLFWwindow* window, float deltaTime);
-
     static void error_callback(int error, const char* description);
-    static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void size_callback(GLFWwindow* window, int width, int height);
-    static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
-    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-    static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 
 public:
     static const std::string DEFAULT_VERTEX_SHADER;
@@ -58,4 +44,11 @@ public:
     Application(int width, int height, const std::string& title);
     ~Application();
     void run();
+
+    Scene* getActiveScene() { return scene.get(); }
+    GLFWwindow* getWindow() { return window; }
+    void loadScene(int index);
+
+    // TOTO JE TA CHYBÌJÍCÍ FUNKCE
+    InputController* getController() { return m_InputController.get(); }
 };
