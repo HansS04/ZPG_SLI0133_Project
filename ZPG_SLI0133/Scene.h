@@ -33,6 +33,7 @@ public:
     Scene();
     void createShaders(const std::string& vsSource, const std::string& fsSource);
     void addObject(const float* data, size_t size);
+    void addObject(const char* modelName);
     void clearObjects();
     size_t getObjectCount() const { return objects.size(); }
 

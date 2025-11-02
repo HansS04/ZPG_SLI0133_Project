@@ -32,6 +32,8 @@ void DrawableObject::draw() const {
     shaderProgram->setMat4("u_ProjectionMatrix", shaderProgram->getProjectionMatrix());
 
     model->draw();
+
+    glUseProgram(0);
 }
 
 TransformationComposite& DrawableObject::getTransformation() {

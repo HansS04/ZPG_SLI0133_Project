@@ -129,6 +129,7 @@ void Application::setupScenes() {
     sceneInitializers.push_back([this](Scene* s) { setupScene1(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene2(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene3(s); });
+    sceneInitializers.push_back([this](Scene* s) { setupScene4(s); });
 }
 
 void Application::loadScene(int index) {
@@ -399,4 +400,42 @@ void Application::setupScene3(Scene* scene) {
     }
 
     scene->getCamera().setPosition(glm::vec3(0.0f, 1.7f, 5.0f));
+}
+
+void Application::setupScene4(Scene* scene) {
+    scene->clearObjects();
+
+    scene->setAmbientLight(glm::vec3(0.05f, 0.05f, 0.1f));
+
+    scene->addDirLight(glm::vec3(0.5f, -1.0f, -0.5f), glm::vec3(0.1f, 0.1f, 0.15f));
+
+    auto mat_house = std::make_shared<Material>();
+    mat_house->diffuse = glm::vec3(0.8f, 0.7f, 0.6f);
+    mat_house->ambient = glm::vec3(0.8f, 0.7f, 0.6f);
+    mat_house->specular = glm::vec3(0.2f, 0.2f, 0.2f);
+    mat_house->shininess = 16.0f;
+
+    auto mat_bulb = std::make_shared<Material>();
+    mat_bulb->diffuse = glm::vec3(1.0f, 0.8f, 0.0f);
+
+    scene->addObject("house.obj");
+    DrawableObject* house = scene->getObject(scene->getObjectCount() - 1);
+    if (house) {
+        house->setMaterial(mat_house);
+        house->getTransformation().translate(glm::vec3(0.0f, 0.0f, -5.0f));
+    }
+
+    glm::vec3 porchLightPos = glm::vec3(-1.5f, 1.0f, -4.0f);
+    glm::vec3 porchLightColor = glm::vec3(1.0f, 0.8f, 0.0f);
+    scene->addPointLight(porchLightPos, porchLightColor, 1.0f, 0.09f, 0.032f);
+
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
+    DrawableObject* bulb = scene->getObject(scene->getObjectCount() - 1);
+    if (bulb) {
+        bulb->setMaterial(mat_bulb);
+        bulb->setUnlit(true);
+        bulb->getTransformation().translate(porchLightPos).scale(glm::vec3(0.1f));
+    }
+
+    scene->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 }

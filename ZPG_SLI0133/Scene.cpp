@@ -58,6 +58,12 @@ void Scene::addObject(const float* data, size_t size) {
     objects.push_back(std::move(obj));
 }
 
+void Scene::addObject(const char* modelName) {
+    std::unique_ptr<Model> m = std::make_unique<Model>(modelName);
+    std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
+    objects.push_back(std::move(obj));
+}
+
 void Scene::clearObjects() {
     objects.clear();
     m_Lights.clear();

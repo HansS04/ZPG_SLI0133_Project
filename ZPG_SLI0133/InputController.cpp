@@ -8,6 +8,7 @@ InputController::InputController(Application& app, GLFWwindow* window, float ini
     : m_App(app), m_Window(window), m_LastX(initialX), m_LastY(initialY) {
 }
 
+
 void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(m_Window, true);
@@ -29,6 +30,7 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_2) == GLFW_PRESS) m_App.loadScene(2);
     if (glfwGetKey(m_Window, GLFW_KEY_3) == GLFW_PRESS) m_App.loadScene(3);
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
+    if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4); // <-- PØIDEJTE TENTO ØÁDEK
 }
 
 void InputController::onKey(int key, int scancode, int action, int mods) {

@@ -71,6 +71,9 @@
     <ClCompile Include="TransformationComposite.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
+    <ClCompile Include="tiny_obj_loader_impl.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -119,6 +122,9 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="tiny_obj_loader.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>

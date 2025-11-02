@@ -177,6 +177,7 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="tiny_obj_loader_impl.cpp" />
     <ClCompile Include="TransformationComposite.cpp" />
     <ClCompile Include="TransformationLeafs.cpp" />
   </ItemGroup>
@@ -194,6 +195,7 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="tiny_obj_loader.h" />
     <ClInclude Include="TransformationComponent.h" />
     <ClInclude Include="TransformationComposite.h" />
     <ClInclude Include="TransformationLeafs.h" />
