@@ -188,6 +188,7 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClInclude Include="ILightObserver.h" />
     <ClInclude Include="InputController.h" />
     <ClInclude Include="Light.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Scene.h" />

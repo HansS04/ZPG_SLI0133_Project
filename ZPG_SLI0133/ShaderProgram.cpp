@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Light.h"
+#include "Material.h"
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 #include <stdexcept>
@@ -77,10 +78,34 @@ void ShaderProgram::setAmbientLight(const glm::vec3& color) const {
     setVec3("u_AmbientLight", color);
 }
 
-void ShaderProgram::setDirLight(const DirLight& light, bool on) const {
-    setBool("u_DirLightOn", on);
-    setVec3("u_DirLight.direction", light.direction);
-    setVec3("u_DirLight.color", light.color);
+void ShaderProgram::setLights(const std::vector<std::unique_ptr<Light>>& lights) const {
+    int dirLightIndex = 0;
+    int pointLightIndex = 0;
+
+    for (const auto& light : lights) {
+        if (DirLight* dLight = dynamic_cast<DirLight*>(light.get())) {
+            if (dirLightIndex < MAX_DIR_LIGHTS) {
+                std::string base = "u_DirLights[" + std::to_string(dirLightIndex) + "].";
+                setVec3(base + "direction", dLight->direction);
+                setVec3(base + "color", dLight->color);
+                dirLightIndex++;
+            }
+        }
+        else if (PointLight* pLight = dynamic_cast<PointLight*>(light.get())) {
+            if (pointLightIndex < MAX_POINT_LIGHTS) {
+                std::string base = "u_PointLights[" + std::to_string(pointLightIndex) + "].";
+                setVec3(base + "position", pLight->position);
+                setVec3(base + "color", pLight->color);
+                setFloat(base + "constant", pLight->constant);
+                setFloat(base + "linear", pLight->linear);
+                setFloat(base + "quadratic", pLight->quadratic);
+                pointLightIndex++;
+            }
+        }
+    }
+
+    setInt("u_DirLightCount", dirLightIndex);
+    setInt("u_PointLightCount", pointLightIndex);
 }
 
 void ShaderProgram::setFlashlight(const SpotLight& light, bool on) const {
@@ -95,24 +120,9 @@ void ShaderProgram::setFlashlight(const SpotLight& light, bool on) const {
     setFloat("u_Flashlight.outerCutOff", light.outerCutOff);
 }
 
-void ShaderProgram::setPointLights(const std::vector<std::unique_ptr<PointLight>>& lights) const {
-    int lightCount = static_cast<int>(lights.size());
-    if (lightCount > MAX_POINT_LIGHTS) {
-        std::cerr << "Varovani: Pocet bodovych svetel (" << lights.size()
-            << ") prekracuje shader limit (" << MAX_POINT_LIGHTS << ")." << std::endl;
-        lightCount = MAX_POINT_LIGHTS;
-    }
-
-    setInt("u_PointLightCount", lightCount);
-
-    for (int i = 0; i < lightCount; ++i) {
-        const auto& light = lights[i];
-        std::string baseName = "u_PointLights[" + std::to_string(i) + "].";
-
-        setVec3(baseName + "position", light->position);
-        setVec3(baseName + "color", light->color);
-        setFloat(baseName + "constant", light->constant);
-        setFloat(baseName + "linear", light->linear);
-        setFloat(baseName + "quadratic", light->quadratic);
-    }
+void ShaderProgram::setMaterial(const Material& mat) const {
+    setVec3("u_Material.ambient", mat.ambient);
+    setVec3("u_Material.diffuse", mat.diffuse);
+    setVec3("u_Material.specular", mat.specular);
+    setFloat("u_Material.shininess", mat.shininess);
 }

@@ -3,25 +3,28 @@
 #include <glm/glm.hpp>
 #include "Model.h"          
 #include "ShaderProgram.h"  
+#include "Material.h" 
 
 class Model;
 class ShaderProgram;
-class TransformationComposite; // Dopøedná deklarace
+class TransformationComposite;
 
 class DrawableObject {
 private:
     std::unique_ptr<Model> model;
     std::unique_ptr<TransformationComposite> transformation;
     std::shared_ptr<ShaderProgram> shaderProgram;
-    glm::vec4 color;
+
+    std::shared_ptr<Material> m_Material;
+    bool isUnlit = false;
 
 public:
     DrawableObject(std::unique_ptr<Model> m, std::shared_ptr<ShaderProgram> s);
-    ~DrawableObject(); // <-- PØIDEJTE TENTO ØÁDEK
+    ~DrawableObject();
 
     void draw() const;
     TransformationComposite& getTransformation();
 
-    void setColor(const glm::vec4& c) { color = c; }
-    const glm::vec4& getColor() const { return color; }
+    void setMaterial(std::shared_ptr<Material> material) { m_Material = material; }
+    void setUnlit(bool unlit) { isUnlit = unlit; }
 };

@@ -4,8 +4,17 @@ out vec4 FragColor;
 in vec3 Normal;    
 in vec3 FragPos;   
 
-uniform vec4 u_Color;
 uniform vec3 u_ViewPos;
+
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+}; 
+uniform Material u_Material;
+
+uniform bool u_IsUnlit; 
 
 struct DirLight {
     vec3 direction;
@@ -31,10 +40,11 @@ struct SpotLight {
     float outerCutOff;
 };
 
-// --- NOVÉ UNIFORMY PRO SVÌTLA ---
 uniform vec3 u_AmbientLight;
-uniform DirLight u_DirLight;
-uniform bool u_DirLightOn;
+
+const int MAX_DIR_LIGHTS = 2;
+uniform DirLight u_DirLights[MAX_DIR_LIGHTS];
+uniform int u_DirLightCount;
 
 const int MAX_POINT_LIGHTS = 8;
 uniform PointLight u_PointLights[MAX_POINT_LIGHTS];
@@ -42,33 +52,23 @@ uniform int u_PointLightCount;
 
 uniform SpotLight u_Flashlight;
 uniform bool u_FlashlightOn;
-// ---
 
-const float SPECULAR_SHININESS = 32.0; 
-
-// --- POMOCNÉ FUNKCE ---
-
-// Spoleèný výpoèet (difuzní + spekulární)
 vec4 CalculateLightBase(vec3 lightColor, vec3 lightDir, vec3 norm, vec3 viewDir) {
-    // Difuzní
     float diff_intensity = max(dot(norm, lightDir), 0.0);
-    vec4 diffuse = vec4(lightColor * diff_intensity * u_Color.rgb, 1.0);
+    vec4 diffuse = vec4(lightColor * diff_intensity * u_Material.diffuse, 1.0);
 
-    // Spekulární
     vec3 halfDir = normalize(lightDir + viewDir);
-    float spec_intensity = pow(max(dot(norm, halfDir), 0.0), SPECULAR_SHININESS);
-    vec4 specular = vec4(lightColor * spec_intensity * vec3(1.0, 1.0, 1.0), 1.0);
+    float spec_intensity = pow(max(dot(norm, halfDir), 0.0), u_Material.shininess);
+    vec4 specular = vec4(lightColor * spec_intensity * u_Material.specular, 1.0);
     
     return diffuse + specular;
 }
 
-// Výpoèet pro smìrové svìtlo
 vec4 CalculateDirLight(DirLight light, vec3 norm, vec3 viewDir) {
     vec3 lightDir = normalize(-light.direction);
     return CalculateLightBase(light.color, lightDir, norm, viewDir);
 }
 
-// Výpoèet pro bodové svìtlo
 vec4 CalculatePointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
     vec4 result = CalculateLightBase(light.color, lightDir, norm, viewDir);
@@ -79,7 +79,6 @@ vec4 CalculatePointLight(PointLight light, vec3 norm, vec3 fragPos, vec3 viewDir
     return result * attenuation;
 }
 
-// Výpoèet pro baterku
 vec4 CalculateSpotLight(SpotLight light, vec3 norm, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
     
@@ -98,25 +97,25 @@ vec4 CalculateSpotLight(SpotLight light, vec3 norm, vec3 fragPos, vec3 viewDir) 
     return vec4(0.0);
 }
 
-// --- HLAVNÍ FUNKCE ---
 void main() {
+    if (u_IsUnlit) {
+        FragColor = vec4(u_Material.diffuse, 1.0);
+        return;
+    }
+
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(u_ViewPos - FragPos);
 
-    // 1. Ambientní svìtlo
-    vec4 result = vec4(u_AmbientLight * u_Color.rgb, 1.0);
+    vec4 result = vec4(u_AmbientLight * u_Material.ambient, 1.0);
     
-    // 2. Smìrové svìtlo
-    if (u_DirLightOn) {
-        result += CalculateDirLight(u_DirLight, norm, viewDir);
+    for (int i = 0; i < u_DirLightCount; i++) {
+        result += CalculateDirLight(u_DirLights[i], norm, viewDir);
     }
 
-    // 3. Bodová svìtla (svìtlušky)
     for (int i = 0; i < u_PointLightCount; i++) {
         result += CalculatePointLight(u_PointLights[i], norm, FragPos, viewDir);
     }
 
-    // 4. Baterka
     if (u_FlashlightOn) {
         result += CalculateSpotLight(u_Flashlight, norm, FragPos, viewDir);
     }

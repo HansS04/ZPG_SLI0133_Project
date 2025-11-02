@@ -2,43 +2,61 @@
 #include <glm/glm.hpp>
 
 /**
- * @brief Smìrové svìtlo (Slunce, Mìsíc). Nemá pozici, jen smìr.
+ * @brief Abstraktní základní tøída pro všechny typy svìtel.
  */
-struct DirLight {
-    glm::vec3 direction;
+class Light {
+public:
     glm::vec3 color;
+
+    Light(const glm::vec3& col) : color(col) {}
+    virtual ~Light() = default;
 };
 
 /**
- * @brief Bodové svìtlo (žárovka, svìtluška). Má pozici a útlum.
- * Toto je vaše pùvodní tøída Light, pøejmenovaná a zjednodušená.
+ * @brief Smìrové svìtlo (Slunce, Mìsíc). Dìdí z Light.
  */
-class PointLight {
+class DirLight : public Light {
+public:
+    glm::vec3 direction;
+
+    DirLight(const glm::vec3& dir, const glm::vec3& col)
+        : Light(col), direction(dir) {
+    }
+};
+
+/**
+ * @brief Bodové svìtlo (žárovka, svìtluška). Dìdí z Light.
+ * Toto byla vaše pùvodní tøída PointLight.
+ */
+class PointLight : public Light {
 public:
     glm::vec3 position;
-    glm::vec3 color;
-
     float constant;
     float linear;
     float quadratic;
 
     PointLight(const glm::vec3& pos, const glm::vec3& col, float con = 1.0f, float lin = 0.09f, float quad = 0.032f)
-        : position(pos), color(col), constant(con), linear(lin), quadratic(quad) {
+        : Light(col), position(pos), constant(con), linear(lin), quadratic(quad) {
     }
 };
 
 /**
- * @brief Reflektor (baterka). Je to bodové svìtlo s kuželem.
+ * @brief Reflektor (baterka). Dìdí z Light.
  */
-struct SpotLight {
+class SpotLight : public Light {
+public:
     glm::vec3 position;
     glm::vec3 direction;
-    glm::vec3 color;
-
     float constant;
     float linear;
     float quadratic;
+    float cutOff;
+    float outerCutOff;
 
-    float cutOff; // Vnitøní úhel (cos)
-    float outerCutOff; // Vnìjší úhel (cos)
+    SpotLight(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& col,
+        float con, float lin, float quad, float cut, float outerCut)
+        : Light(col), position(pos), direction(dir),
+        constant(con), linear(lin), quadratic(quad),
+        cutOff(cut), outerCutOff(outerCut) {
+    }
 };

@@ -5,13 +5,12 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "ICameraObserver.h" 
-// ILightObserver.h je odstranìn
 
 class Shader;
 class Camera;
-struct DirLight;
-class PointLight;
-struct SpotLight;
+class Light;
+class SpotLight;
+struct Material;
 
 class ShaderProgram : public ICameraObserver {
 private:
@@ -26,6 +25,7 @@ private:
     GLint getUniformLocation(const std::string& name) const;
 
 public:
+    static const int MAX_DIR_LIGHTS = 2;
     static const int MAX_POINT_LIGHTS = 8;
 
     ShaderProgram(Shader& vs, Shader& fs);
@@ -43,9 +43,9 @@ public:
     void setBool(const std::string& name, bool value) const;
 
     void setAmbientLight(const glm::vec3& color) const;
-    void setDirLight(const DirLight& light, bool on) const;
-    void setPointLights(const std::vector<std::unique_ptr<PointLight>>& lights) const;
+    void setLights(const std::vector<std::unique_ptr<Light>>& lights) const;
     void setFlashlight(const SpotLight& light, bool on) const;
+    void setMaterial(const Material& mat) const;
 
     const glm::mat4& getViewMatrix() const { return cachedViewMatrix; }
     const glm::mat4& getProjectionMatrix() const { return cachedProjectionMatrix; }

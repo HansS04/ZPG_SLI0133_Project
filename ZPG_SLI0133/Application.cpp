@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "TransformationComposite.h"
+#include "Material.h"
 #include <stdexcept>
 #include <glm/glm.hpp> 
 #include <vector>
@@ -143,11 +144,18 @@ void Application::loadScene(int index) {
 
 void Application::setupScene0(Scene* s) {
     s->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-    s->setDirLight(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f), false);
+    s->addDirLight(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
 
-    s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    auto triMaterial = std::make_shared<Material>();
+    triMaterial->diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
+    triMaterial->ambient = glm::vec3(1.0f, 0.0f, 0.0f);
+    triMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    triMaterial->shininess = 32.0f;
+
+    s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE);
     DrawableObject* obj = s->getFirstObject();
     if (obj) {
+        obj->setMaterial(triMaterial);
         obj->getTransformation().translate(glm::vec3(0.0f, 1.0f, 0.0f));
     }
 }
@@ -156,40 +164,52 @@ const size_t SPHERE_VERTICES_SIZE = sizeof(sphere);
 
 void Application::setupScene1(Scene* scene) {
     scene->clearObjects();
-
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
 
-    const glm::vec4 SPHERE_COLOR(0.9f, 0.9f, 0.9f, 1.0f);
-    const glm::vec4 LIGHT_BULB_COLOR(1.0f, 1.0f, 1.0f, 1.0f);
+    auto sphereMaterial = std::make_shared<Material>();
+    sphereMaterial->diffuse = glm::vec3(0.9f, 0.9f, 0.9f);
+    sphereMaterial->ambient = glm::vec3(0.9f, 0.9f, 0.9f);
+    sphereMaterial->specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    sphereMaterial->shininess = 64.0f;
+
+    auto lightBulbMaterial = std::make_shared<Material>();
+    lightBulbMaterial->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+
     const float OBJECT_RADIUS = 1.0f;
     const float OBJECT_OFFSET = 1.5f;
     const float OBJECT_Y_POS = 0.0f;
     const glm::vec3 LIGHT_POS(0.0f, 3.0f, 0.0f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, SPHERE_COLOR);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* s1 = scene->getObject(scene->getObjectCount() - 1);
+    s1->setMaterial(sphereMaterial);
     s1->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s1->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, SPHERE_COLOR);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* s2 = scene->getObject(scene->getObjectCount() - 1);
+    s2->setMaterial(sphereMaterial);
     s2->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s2->getTransformation().translate(glm::vec3(OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, SPHERE_COLOR);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* s3 = scene->getObject(scene->getObjectCount() - 1);
+    s3->setMaterial(sphereMaterial);
     s3->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s3->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, -OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, SPHERE_COLOR);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* s4 = scene->getObject(scene->getObjectCount() - 1);
+    s4->setMaterial(sphereMaterial);
     s4->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s4->getTransformation().translate(glm::vec3(OBJECT_OFFSET, OBJECT_Y_POS, -OBJECT_OFFSET));
 
     scene->addPointLight(LIGHT_POS, glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, LIGHT_BULB_COLOR);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* lightBulb = scene->getObject(scene->getObjectCount() - 1);
+    lightBulb->setMaterial(lightBulbMaterial);
+    lightBulb->setUnlit(true);
     lightBulb->getTransformation().scale(glm::vec3(0.15f));
     lightBulb->getTransformation().translate(LIGHT_POS);
 
@@ -208,28 +228,39 @@ float moonOrbitAngle = 0.0f;
 
 void Application::setupScene2(Scene* scene) {
     scene->clearObjects();
-
     scene->setAmbientLight(glm::vec3(0.2f, 0.2f, 0.2f));
 
-    const float SCALE_SUN = 2.5f;
-    const glm::vec4 COLOR_SUN_BRIGHT(1.0f, 1.0f, 0.6f, 1.0f);
-    const glm::vec4 COLOR_EARTH(0.0f, 0.0f, 0.8f, 1.0f);
-    const glm::vec4 COLOR_MOON(0.5f, 0.5f, 0.5f, 1.0f);
+    auto sunMaterial = std::make_shared<Material>();
+    sunMaterial->diffuse = glm::vec3(1.0f, 1.0f, 0.6f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, COLOR_SUN_BRIGHT);
+    auto earthMaterial = std::make_shared<Material>();
+    earthMaterial->diffuse = glm::vec3(0.0f, 0.0f, 0.8f);
+    earthMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
+    earthMaterial->shininess = 32.0f;
+
+    auto moonMaterial = std::make_shared<Material>();
+    moonMaterial->diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+    moonMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    moonMaterial->shininess = 8.0f;
+
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* sun = scene->getObject(scene->getObjectCount() - 1);
-    sun->getTransformation().scale(glm::vec3(SCALE_SUN));
+    sun->setMaterial(sunMaterial);
+    sun->setUnlit(true);
+    sun->getTransformation().scale(glm::vec3(2.5f));
     sun->getTransformation().translate(glm::vec3(0.0f, 0.0f, 0.0f));
 
     scene->addPointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), 1.0f, 0.007f, 0.0002f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, COLOR_EARTH);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* earth = scene->getObject(scene->getObjectCount() - 1);
+    earth->setMaterial(earthMaterial);
     earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
     earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, COLOR_MOON);
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* moon = scene->getObject(scene->getObjectCount() - 1);
+    moon->setMaterial(moonMaterial);
     moon->getTransformation().scale(glm::vec3(SCALE_MOON));
     moon->getTransformation().translate(glm::vec3(MOON_EARTH_DISTANCE, 0.0f, 0.0f));
 
@@ -242,10 +273,33 @@ void Application::setupScene2(Scene* scene) {
 extern const size_t BENCH_DATA_SIZE;
 
 void Application::setupScene3(Scene* scene) {
-    const glm::vec4 BROWN = glm::vec4(0.55f, 0.27f, 0.07f, 1.0f);
-    const glm::vec4 BEIGE = glm::vec4(0.85f, 0.75f, 0.60f, 1.0f);
-    const glm::vec4 FOREST_GREEN = glm::vec4(0.1f, 0.35f, 0.1f, 1.0f);
-    const glm::vec4 TREE_BUSH_COLOR = glm::vec4(0.1f, 0.4f, 0.1f, 1.0f);
+    auto mat_grass = std::make_shared<Material>();
+    mat_grass->diffuse = glm::vec3(0.1f, 0.35f, 0.1f);
+    mat_grass->ambient = glm::vec3(0.1f, 0.35f, 0.1f);
+    mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f);
+    mat_grass->shininess = 16.0f;
+
+    auto mat_path = std::make_shared<Material>();
+    mat_path->diffuse = glm::vec3(0.85f, 0.75f, 0.60f);
+    mat_path->ambient = glm::vec3(0.85f, 0.75f, 0.60f);
+    mat_path->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_path->shininess = 8.0f;
+
+    auto mat_tree = std::make_shared<Material>();
+    mat_tree->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+    mat_tree->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
+    mat_tree->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_tree->shininess = 16.0f;
+
+    auto mat_bench = std::make_shared<Material>();
+    mat_bench->diffuse = glm::vec3(0.55f, 0.27f, 0.07f);
+    mat_bench->ambient = glm::vec3(0.55f, 0.27f, 0.07f);
+    mat_bench->specular = glm::vec3(0.2f, 0.2f, 0.2f);
+    mat_bench->shininess = 32.0f;
+
+    auto mat_firefly_body = std::make_shared<Material>();
+    mat_firefly_body->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+
     const float SCENE_LENGTH = 100.0f;
     const float PATH_WIDTH = 2.0f;
     const float FOREST_WIDTH = 10.0f;
@@ -256,12 +310,14 @@ void Application::setupScene3(Scene* scene) {
     const float BENCH_SCALE = 0.6f;
     const float PATH_Y_OFFSET = 0.001f;
 
-    scene->addObject(plain, sizeof(plain), FOREST_GREEN);
+    scene->addObject(plain, sizeof(plain));
     DrawableObject* groundObj = scene->getObject(scene->getObjectCount() - 1);
+    groundObj->setMaterial(mat_grass);
     groundObj->getTransformation().scale(glm::vec3(FOREST_WIDTH, 1.0f, SCENE_LENGTH / 2.0f));
 
-    scene->addObject(plain, sizeof(plain), BEIGE);
+    scene->addObject(plain, sizeof(plain));
     DrawableObject* pathObj = scene->getObject(scene->getObjectCount() - 1);
+    pathObj->setMaterial(mat_path);
     pathObj->getTransformation().scale(glm::vec3(PATH_WIDTH / 2.0f, 1.0f, SCENE_LENGTH / 2.0f));
     pathObj->getTransformation().translate(glm::vec3(0.0f, PATH_Y_OFFSET, 0.0f));
 
@@ -277,8 +333,9 @@ void Application::setupScene3(Scene* scene) {
         float randXOffset = randX_dist(m_RandomEngine);
         if (randSign_dist(m_RandomEngine) == 0) randXOffset = -randXOffset;
 
-        scene->addObject(tree, sizeof(tree), TREE_BUSH_COLOR);
+        scene->addObject(tree, sizeof(tree));
         DrawableObject* treeObj = scene->getObject(scene->getObjectCount() - 1);
+        treeObj->setMaterial(mat_tree);
         treeObj->getTransformation().translate(glm::vec3(randXOffset, 0.0f, randZ));
         treeObj->getTransformation().scale(glm::vec3(OBJ_SCALE));
     }
@@ -287,8 +344,9 @@ void Application::setupScene3(Scene* scene) {
         float randXOffset = randX_dist(m_RandomEngine);
         if (randSign_dist(m_RandomEngine) == 0) randXOffset = -randXOffset;
 
-        scene->addObject(bushes, sizeof(bushes), TREE_BUSH_COLOR);
+        scene->addObject(bushes, sizeof(bushes));
         DrawableObject* bushObj = scene->getObject(scene->getObjectCount() - 1);
+        bushObj->setMaterial(mat_tree);
         bushObj->getTransformation().translate(glm::vec3(randXOffset, 0.0f, randZ));
         bushObj->getTransformation().scale(glm::vec3(OBJ_SCALE));
     }
@@ -297,13 +355,16 @@ void Application::setupScene3(Scene* scene) {
     float currentBenchZ = -(SCENE_LENGTH / 2.0f) + BENCH_SPACING;
     const float BENCH_X_OFFSET = PATH_WIDTH / 2.0f + 0.1f;
     for (int i = 0; i < NUM_BENCHES; ++i) {
-        scene->addObject(bench, BENCH_DATA_SIZE, BROWN);
+        scene->addObject(bench, BENCH_DATA_SIZE);
         DrawableObject* benchL = scene->getObject(scene->getObjectCount() - 1);
+        benchL->setMaterial(mat_bench);
         benchL->getTransformation().translate(glm::vec3(-BENCH_X_OFFSET - 0.75f, PATH_Y_OFFSET, currentBenchZ));
         benchL->getTransformation().scale(glm::vec3(BENCH_SCALE));
         benchL->getTransformation().rotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        scene->addObject(bench, BENCH_DATA_SIZE, BROWN);
+
+        scene->addObject(bench, BENCH_DATA_SIZE);
         DrawableObject* benchR = scene->getObject(scene->getObjectCount() - 1);
+        benchR->setMaterial(mat_bench);
         benchR->getTransformation().translate(glm::vec3(BENCH_X_OFFSET + 0.75f, PATH_Y_OFFSET, currentBenchZ));
         benchR->getTransformation().scale(glm::vec3(BENCH_SCALE));
         benchR->getTransformation().rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -311,14 +372,14 @@ void Application::setupScene3(Scene* scene) {
     }
 
     scene->setAmbientLight(glm::vec3(0.02f, 0.02f, 0.05f));
-    scene->setDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.15f), true);
+    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.15f));
 
     std::cout << "Pridavam svetlusky do sceny 3..." << std::endl;
     const int numFireflies = 8;
-    const glm::vec3 fireflyColor = glm::vec3(4.0f, 5.0f, 2.0f);
+    const glm::vec3 fireflyLightColor = glm::vec3(1.0f, 1.2f, 0.5f);
     const float con = 1.0f;
-    const float lin = 0.7f;
-    const float quad = 1.8f;
+    const float lin = 1.0f;
+    const float quad = 2.0f;
 
     std::uniform_real_distribution<float> randY_dist(0.5f, 2.5f);
 
@@ -327,7 +388,14 @@ void Application::setupScene3(Scene* scene) {
         if (randSign_dist(m_RandomEngine) == 0) x = -x;
         float y = randY_dist(m_RandomEngine);
         float z = randZ_dist(m_RandomEngine);
-        scene->addPointLight(glm::vec3(x, y, z), fireflyColor, con, lin, quad);
+
+        scene->addFirefly(glm::vec3(x, y, z), fireflyLightColor, con, lin, quad);
+
+        scene->addObject(sphere, SPHERE_VERTICES_SIZE);
+        DrawableObject* fireflyBody = scene->getObject(scene->getObjectCount() - 1);
+        fireflyBody->setMaterial(mat_firefly_body);
+        fireflyBody->setUnlit(true);
+        scene->addFireflyBody(fireflyBody);
     }
 
     scene->getCamera().setPosition(glm::vec3(0.0f, 1.7f, 5.0f));

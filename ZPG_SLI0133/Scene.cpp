@@ -20,20 +20,16 @@ extern bool direction;
 Scene::Scene()
     : m_FireflyTime(0.0f),
     m_AmbientLightColor(0.1f, 0.1f, 0.1f),
-    m_DirLightOn(false),
     m_FlashlightOn(false)
 {
-    m_DirLight = std::make_unique<DirLight>();
-    m_DirLight->direction = glm::vec3(-0.2f, -1.0f, -0.3f);
-    m_DirLight->color = glm::vec3(1.0f, 1.0f, 1.0f);
-
-    m_Flashlight = std::make_unique<SpotLight>();
-    m_Flashlight->color = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_Flashlight->constant = 1.0f;
-    m_Flashlight->linear = 0.09f;
-    m_Flashlight->quadratic = 0.032f;
-    m_Flashlight->cutOff = glm::cos(glm::radians(12.5f));
-    m_Flashlight->outerCutOff = glm::cos(glm::radians(15.5f));
+    m_Flashlight = std::make_unique<SpotLight>(
+        glm::vec3(0, 0, 0),
+        glm::vec3(0, 0, -1),
+        glm::vec3(1.0f, 1.0f, 1.0f),
+        1.0f, 0.09f, 0.032f,
+        glm::cos(glm::radians(12.5f)),
+        glm::cos(glm::radians(15.5f))
+    );
 }
 
 void Scene::createShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
@@ -56,17 +52,18 @@ void Scene::createShaders(const std::string& vertexShaderFile, const std::string
     camera->updateMatrices();
 }
 
-void Scene::addObject(const float* data, size_t size, const glm::vec4& color) {
+void Scene::addObject(const float* data, size_t size) {
     std::unique_ptr<Model> m = std::make_unique<Model>(data, size);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
-    obj->setColor(color);
     objects.push_back(std::move(obj));
 }
 
 void Scene::clearObjects() {
     objects.clear();
-    m_PointLights.clear();
-    m_PointLightBasePositions.clear();
+    m_Lights.clear();
+    m_FireflyPtrs.clear();
+    m_FireflyBasePositions.clear();
+    m_FireflyBodyPtrs.clear();
 }
 
 
@@ -77,10 +74,8 @@ void Scene::render() const {
         colorShaderProgram->use();
 
         colorShaderProgram->setVec3("u_ViewPos", camera->getPosition());
-
         colorShaderProgram->setAmbientLight(m_AmbientLightColor);
-        colorShaderProgram->setDirLight(*m_DirLight, m_DirLightOn);
-        colorShaderProgram->setPointLights(m_PointLights);
+        colorShaderProgram->setLights(m_Lights);
         colorShaderProgram->setFlashlight(*m_Flashlight, m_FlashlightOn);
     }
 
@@ -139,15 +134,22 @@ void Scene::update(float deltaTime, int currentSceneIndex) {
     if (currentSceneIndex == 3) {
         m_FireflyTime += deltaTime * 0.7f;
 
-        for (size_t i = 0; i < m_PointLights.size(); ++i) {
-            glm::vec3 basePos = m_PointLightBasePositions[i];
+        for (size_t i = 0; i < m_FireflyPtrs.size(); ++i) {
+            glm::vec3 basePos = m_FireflyBasePositions[i];
 
             glm::vec3 offset;
             offset.x = sin(m_FireflyTime + i * 2.1f) * 0.5f;
             offset.y = cos(m_FireflyTime + i * 1.7f) * 0.3f;
             offset.z = sin(m_FireflyTime + i * 0.8f) * 0.5f;
 
-            m_PointLights[i]->position = basePos + offset;
+            glm::vec3 newPos = basePos + offset;
+            m_FireflyPtrs[i]->position = newPos;
+
+            if (i < m_FireflyBodyPtrs.size()) {
+                m_FireflyBodyPtrs[i]->getTransformation().reset();
+                m_FireflyBodyPtrs[i]->getTransformation().translate(newPos);
+                m_FireflyBodyPtrs[i]->getTransformation().scale(glm::vec3(0.05f));
+            }
         }
     }
 }
@@ -166,17 +168,33 @@ void Scene::setAmbientLight(const glm::vec3& color) {
     m_AmbientLightColor = color;
 }
 
-void Scene::setDirLight(const glm::vec3& direction, const glm::vec3& color, bool on) {
-    m_DirLight->direction = direction;
-    m_DirLight->color = color;
-    m_DirLightOn = on;
+DirLight* Scene::addDirLight(const glm::vec3& dir, const glm::vec3& col) {
+    auto newLight = std::make_unique<DirLight>(dir, col);
+    DirLight* ptr = newLight.get();
+    m_Lights.push_back(std::move(newLight));
+    return ptr;
 }
 
 PointLight* Scene::addPointLight(const glm::vec3& pos, const glm::vec3& col, float constant, float linear, float quadratic) {
     auto newLight = std::make_unique<PointLight>(pos, col, constant, linear, quadratic);
-    m_PointLights.emplace_back(std::move(newLight));
-    m_PointLightBasePositions.push_back(pos);
-    return m_PointLights.back().get();
+    PointLight* ptr = newLight.get();
+    m_Lights.push_back(std::move(newLight));
+    return ptr;
+}
+
+PointLight* Scene::addFirefly(const glm::vec3& pos, const glm::vec3& col, float constant, float linear, float quadratic) {
+    auto newLight = std::make_unique<PointLight>(pos, col, constant, linear, quadratic);
+    PointLight* ptr = newLight.get();
+    m_Lights.push_back(std::move(newLight));
+
+    m_FireflyPtrs.push_back(ptr);
+    m_FireflyBasePositions.push_back(pos);
+
+    return ptr;
+}
+
+void Scene::addFireflyBody(DrawableObject* body) {
+    m_FireflyBodyPtrs.push_back(body);
 }
 
 void Scene::toggleFlashlight() {
