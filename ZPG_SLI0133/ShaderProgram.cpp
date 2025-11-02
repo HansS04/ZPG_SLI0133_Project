@@ -120,6 +120,27 @@ void ShaderProgram::setFlashlight(const SpotLight& light, bool on) const {
     setFloat("u_Flashlight.outerCutOff", light.outerCutOff);
 }
 
+void ShaderProgram::setSpotLights(const std::vector<std::unique_ptr<SpotLight>>& lights) const {
+    int lightCount = static_cast<int>(lights.size());
+    if (lightCount > MAX_SPOT_LIGHTS) {
+        lightCount = MAX_SPOT_LIGHTS;
+    }
+    setInt("u_SpotLightCount", lightCount);
+
+    for (int i = 0; i < lightCount; ++i) {
+        const auto& light = lights[i];
+        std::string base = "u_SpotLights[" + std::to_string(i) + "].";
+        setVec3(base + "position", light->position);
+        setVec3(base + "direction", light->direction);
+        setVec3(base + "color", light->color);
+        setFloat(base + "constant", light->constant);
+        setFloat(base + "linear", light->linear);
+        setFloat(base + "quadratic", light->quadratic);
+        setFloat(base + "cutOff", light->cutOff);
+        setFloat(base + "outerCutOff", light->outerCutOff);
+    }
+}
+
 void ShaderProgram::setMaterial(const Material& mat) const {
     setVec3("u_Material.ambient", mat.ambient);
     setVec3("u_Material.diffuse", mat.diffuse);

@@ -3,6 +3,7 @@ out vec4 FragColor;
 
 in vec3 Normal;    
 in vec3 FragPos;   
+in vec2 TexCoords;
 
 uniform vec3 u_ViewPos;
 
@@ -49,6 +50,10 @@ uniform int u_DirLightCount;
 const int MAX_POINT_LIGHTS = 8;
 uniform PointLight u_PointLights[MAX_POINT_LIGHTS];
 uniform int u_PointLightCount;
+
+const int MAX_SPOT_LIGHTS = 4;
+uniform SpotLight u_SpotLights[MAX_SPOT_LIGHTS];
+uniform int u_SpotLightCount;
 
 uniform SpotLight u_Flashlight;
 uniform bool u_FlashlightOn;
@@ -114,6 +119,10 @@ void main() {
 
     for (int i = 0; i < u_PointLightCount; i++) {
         result += CalculatePointLight(u_PointLights[i], norm, FragPos, viewDir);
+    }
+
+    for (int i = 0; i < u_SpotLightCount; i++) {
+        result += CalculateSpotLight(u_SpotLights[i], norm, FragPos, viewDir);
     }
 
     if (u_FlashlightOn) {

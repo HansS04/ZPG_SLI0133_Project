@@ -27,6 +27,7 @@ private:
 public:
     static const int MAX_DIR_LIGHTS = 2;
     static const int MAX_POINT_LIGHTS = 8;
+    static const int MAX_SPOT_LIGHTS = 4;
 
     ShaderProgram(Shader& vs, Shader& fs);
     ~ShaderProgram();
@@ -45,6 +46,7 @@ public:
     void setAmbientLight(const glm::vec3& color) const;
     void setLights(const std::vector<std::unique_ptr<Light>>& lights) const;
     void setFlashlight(const SpotLight& light, bool on) const;
+    void setSpotLights(const std::vector<std::unique_ptr<SpotLight>>& lights) const;
     void setMaterial(const Material& mat) const;
 
     const glm::mat4& getViewMatrix() const { return cachedViewMatrix; }

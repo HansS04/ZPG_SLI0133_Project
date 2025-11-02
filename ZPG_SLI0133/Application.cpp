@@ -130,6 +130,7 @@ void Application::setupScenes() {
     sceneInitializers.push_back([this](Scene* s) { setupScene2(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene3(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene4(s); });
+    sceneInitializers.push_back([this](Scene* s) { setupScene5(s); });
 }
 
 void Application::loadScene(int index) {
@@ -438,4 +439,98 @@ void Application::setupScene4(Scene* scene) {
     }
 
     scene->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+void Application::setupScene5(Scene* scene) {
+    scene->clearObjects();
+
+    // Materiál pro ÈERNÉ stìny (zùstává)
+    auto mat_floor_wall = std::make_shared<Material>();
+    mat_floor_wall->diffuse = glm::vec3(0.02f, 0.02f, 0.02f); 
+    mat_floor_wall->ambient = glm::vec3(0.0f, 0.0f, 0.0f);   
+    mat_floor_wall->specular = glm::vec3(0.1f, 0.1f, 0.1f);  
+    mat_floor_wall->shininess = 16.0f;
+
+    // --- NOVÁ ÈÁST: Materiál pro BÍLOU podlahu ---
+    auto mat_floor_white = std::make_shared<Material>();
+    mat_floor_white->diffuse = glm::vec3(0.4f, 0.4f, 0.4); // Bílá difuzní
+    mat_floor_white->ambient = glm::vec3(0.01f, 0.01f, 0.01f); // Bílá ambientní
+    mat_floor_white->specular = glm::vec3(0.3f, 0.3f, 0.3f); // Mírný odlesk
+    mat_floor_white->shininess = 32.0f;
+    // --- KONEC NOVÉ ÈÁSTI ---
+
+    auto mat_formula = std::make_shared<Material>();
+    mat_formula->diffuse = glm::vec3(0.01f, 0.01f, 0.01f); 
+    mat_formula->ambient = glm::vec3(0.0f, 0.0f, 0.0f);   
+    mat_formula->specular = glm::vec3(1.0f, 1.0f, 1.0f);  
+    mat_formula->shininess = 512.0f; 
+
+    auto mat_bulb = std::make_shared<Material>();
+    mat_bulb->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
+
+    scene->addObject(plain, sizeof(plain));
+    DrawableObject* floor = scene->getObject(scene->getObjectCount() - 1);
+    floor->setMaterial(mat_floor_white); // <-- ZMÌNA: Pøiøazení bílého materiálu
+    floor->getTransformation().scale(glm::vec3(10.0f));
+
+    scene->addObject(plain, sizeof(plain));
+    DrawableObject* wall_back = scene->getObject(scene->getObjectCount() - 1);
+    wall_back->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_back->getTransformation()
+        .translate(glm::vec3(0.0f, 10.0f, -10.0f))
+        .scale(glm::vec3(10.0f))
+        .rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    scene->addObject(plain, sizeof(plain));
+    DrawableObject* wall_left = scene->getObject(scene->getObjectCount() - 1);
+    wall_left->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_left->getTransformation()
+        .translate(glm::vec3(-10.0f, 10.0f, 0.0f))
+        .scale(glm::vec3(10.0f))
+        .rotate(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    scene->addObject(plain, sizeof(plain));
+    DrawableObject* wall_right = scene->getObject(scene->getObjectCount() - 1);
+    wall_right->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_right->getTransformation()
+        .translate(glm::vec3(10.0f, 10.0f, 0.0f))
+        .scale(glm::vec3(10.0f))
+        .rotate(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    scene->addObject("formula1.obj");
+    DrawableObject* formula = scene->getObject(scene->getObjectCount() - 1);
+    formula->setMaterial(mat_formula);
+    formula->getTransformation()
+        .translate(glm::vec3(0.0f, 0.0f, -2.0f))
+        .scale(glm::vec3(0.1f));
+
+    glm::vec3 topLightPos = glm::vec3(0.0f, 5.0f, -2.0f);
+    scene->addPointLight(topLightPos, glm::vec3(0.15f, 0.15f, 0.15f), 1.0f, 0.09f, 0.032f);
+
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE); // Použijeme vaši `sphere` z .h
+    DrawableObject* bulb = scene->getObject(scene->getObjectCount() - 1);
+    bulb->setMaterial(mat_bulb);
+    bulb->setUnlit(true);
+    bulb->getTransformation().translate(topLightPos).scale(glm::vec3(0.2f));
+
+    glm::vec3 target = glm::vec3(0.0f, 0.5f, -2.0f);
+    const float c = 1.0f, l = 0.045f, q = 0.0075f;
+    const float cut = glm::cos(glm::radians(20.0f));
+    const float outerCut = glm::cos(glm::radians(25.0f));
+
+    glm::vec3 pos1 = glm::vec3(-5.0f, 2.0f, 5.0f);
+    scene->addSpotLight(pos1, glm::normalize(target - pos1), glm::vec3(1.0f, 0.0f, 0.0f), c, l, q, cut, outerCut);
+
+    glm::vec3 pos2 = glm::vec3(5.0f, 2.0f, 5.0f);
+    scene->addSpotLight(pos2, glm::normalize(target - pos2), glm::vec3(0.0f, 1.0f, 0.0f), c, l, q, cut, outerCut);
+
+    glm::vec3 pos3 = glm::vec3(-2.0f, 1.0f, 7.0f);
+    scene->addSpotLight(pos3, glm::normalize(target - pos3), glm::vec3(0.0f, 0.0f, 1.0f), c, l, q, cut, outerCut);
+
+    glm::vec3 pos4 = glm::vec3(2.0f, 1.0f, 7.0f);
+    scene->addSpotLight(pos4, glm::normalize(target - pos4), glm::vec3(1.0f, 1.0f, 0.0f), c, l, q, cut, outerCut);
+
+    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 10.0f));
 }

@@ -41,6 +41,7 @@ private:
     void setupScene2(Scene* scene);
     void setupScene3(Scene* scene);
     void setupScene4(Scene* scene);
+    void setupScene5(Scene* scene);
 
     static void error_callback(int error, const char* description);
     static void size_callback(GLFWwindow* window, int width, int height);

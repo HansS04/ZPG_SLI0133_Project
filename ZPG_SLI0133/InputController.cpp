@@ -30,7 +30,8 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_2) == GLFW_PRESS) m_App.loadScene(2);
     if (glfwGetKey(m_Window, GLFW_KEY_3) == GLFW_PRESS) m_App.loadScene(3);
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
-    if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4); // <-- PØIDEJTE TENTO ØÁDEK
+    if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4);
+    if (glfwGetKey(m_Window, GLFW_KEY_5) == GLFW_PRESS) m_App.loadScene(5);
 }
 
 void InputController::onKey(int key, int scancode, int action, int mods) {

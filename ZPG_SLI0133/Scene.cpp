@@ -67,6 +67,7 @@ void Scene::addObject(const char* modelName) {
 void Scene::clearObjects() {
     objects.clear();
     m_Lights.clear();
+    m_SpotLights.clear();
     m_FireflyPtrs.clear();
     m_FireflyBasePositions.clear();
     m_FireflyBodyPtrs.clear();
@@ -82,6 +83,7 @@ void Scene::render() const {
         colorShaderProgram->setVec3("u_ViewPos", camera->getPosition());
         colorShaderProgram->setAmbientLight(m_AmbientLightColor);
         colorShaderProgram->setLights(m_Lights);
+        colorShaderProgram->setSpotLights(m_SpotLights);
         colorShaderProgram->setFlashlight(*m_Flashlight, m_FlashlightOn);
     }
 
@@ -196,6 +198,13 @@ PointLight* Scene::addFirefly(const glm::vec3& pos, const glm::vec3& col, float 
     m_FireflyPtrs.push_back(ptr);
     m_FireflyBasePositions.push_back(pos);
 
+    return ptr;
+}
+
+SpotLight* Scene::addSpotLight(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& col, float c, float l, float q, float cut, float outerCut) {
+    auto newLight = std::make_unique<SpotLight>(pos, dir, col, c, l, q, cut, outerCut);
+    SpotLight* ptr = newLight.get();
+    m_SpotLights.push_back(std::move(newLight));
     return ptr;
 }
 

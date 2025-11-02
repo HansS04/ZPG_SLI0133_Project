@@ -20,6 +20,7 @@ private:
     glm::vec3 m_AmbientLightColor;
 
     std::vector<std::unique_ptr<Light>> m_Lights;
+    std::vector<std::unique_ptr<SpotLight>> m_SpotLights;
 
     std::unique_ptr<SpotLight> m_Flashlight;
     bool m_FlashlightOn;
@@ -53,6 +54,7 @@ public:
     DirLight* addDirLight(const glm::vec3& dir, const glm::vec3& col);
     PointLight* addPointLight(const glm::vec3& pos, const glm::vec3& col, float c, float l, float q);
     PointLight* addFirefly(const glm::vec3& pos, const glm::vec3& col, float c, float l, float q);
+    SpotLight* addSpotLight(const glm::vec3& pos, const glm::vec3& dir, const glm::vec3& col, float c, float l, float q, float cut, float outerCut);
     void addFireflyBody(DrawableObject* body);
 
     void toggleFlashlight();
