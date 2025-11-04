@@ -10,7 +10,7 @@ private:
 
 public:
     Model(const float* points, size_t size, GLint mode = GL_TRIANGLES);
-    Model(const char* name); // Nový konstruktor pro .obj
+    Model(const char* name); 
     ~Model();
     void draw() const;
 };

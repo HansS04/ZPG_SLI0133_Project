@@ -44,9 +44,6 @@
     <ClCompile Include="InputController.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Soubory zdrojů</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
@@ -125,6 +122,24 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="tiny_obj_loader.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="DirLight.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="PointLight.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="SpotLight.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="Lights.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="sky_cube.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>

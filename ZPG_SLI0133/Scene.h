@@ -5,7 +5,7 @@
 #include <string>
 #include "DrawableObject.h" 
 #include "Camera.h" 
-#include "Light.h"
+#include "Lights.h"
 
 class DrawableObject;
 class ShaderProgram;

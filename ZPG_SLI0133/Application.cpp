@@ -444,20 +444,17 @@ void Application::setupScene4(Scene* scene) {
 void Application::setupScene5(Scene* scene) {
     scene->clearObjects();
 
-    // Materiál pro ÈERNÉ stìny (zùstává)
     auto mat_floor_wall = std::make_shared<Material>();
     mat_floor_wall->diffuse = glm::vec3(0.02f, 0.02f, 0.02f); 
     mat_floor_wall->ambient = glm::vec3(0.0f, 0.0f, 0.0f);   
     mat_floor_wall->specular = glm::vec3(0.1f, 0.1f, 0.1f);  
     mat_floor_wall->shininess = 16.0f;
 
-    // --- NOVÁ ÈÁST: Materiál pro BÍLOU podlahu ---
     auto mat_floor_white = std::make_shared<Material>();
-    mat_floor_white->diffuse = glm::vec3(0.4f, 0.4f, 0.4); // Bílá difuzní
-    mat_floor_white->ambient = glm::vec3(0.01f, 0.01f, 0.01f); // Bílá ambientní
-    mat_floor_white->specular = glm::vec3(0.3f, 0.3f, 0.3f); // Mírný odlesk
+    mat_floor_white->diffuse = glm::vec3(0.4f, 0.4f, 0.4);
+    mat_floor_white->ambient = glm::vec3(0.01f, 0.01f, 0.01f);
+    mat_floor_white->specular = glm::vec3(0.3f, 0.3f, 0.3f); 
     mat_floor_white->shininess = 32.0f;
-    // --- KONEC NOVÉ ÈÁSTI ---
 
     auto mat_formula = std::make_shared<Material>();
     mat_formula->diffuse = glm::vec3(0.01f, 0.01f, 0.01f); 
@@ -472,12 +469,12 @@ void Application::setupScene5(Scene* scene) {
 
     scene->addObject(plain, sizeof(plain));
     DrawableObject* floor = scene->getObject(scene->getObjectCount() - 1);
-    floor->setMaterial(mat_floor_white); // <-- ZMÌNA: Pøiøazení bílého materiálu
+    floor->setMaterial(mat_floor_white);
     floor->getTransformation().scale(glm::vec3(10.0f));
 
     scene->addObject(plain, sizeof(plain));
     DrawableObject* wall_back = scene->getObject(scene->getObjectCount() - 1);
-    wall_back->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_back->setMaterial(mat_floor_wall);
     wall_back->getTransformation()
         .translate(glm::vec3(0.0f, 10.0f, -10.0f))
         .scale(glm::vec3(10.0f))
@@ -485,7 +482,7 @@ void Application::setupScene5(Scene* scene) {
 
     scene->addObject(plain, sizeof(plain));
     DrawableObject* wall_left = scene->getObject(scene->getObjectCount() - 1);
-    wall_left->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_left->setMaterial(mat_floor_wall);
     wall_left->getTransformation()
         .translate(glm::vec3(-10.0f, 10.0f, 0.0f))
         .scale(glm::vec3(10.0f))
@@ -493,7 +490,7 @@ void Application::setupScene5(Scene* scene) {
 
     scene->addObject(plain, sizeof(plain));
     DrawableObject* wall_right = scene->getObject(scene->getObjectCount() - 1);
-    wall_right->setMaterial(mat_floor_wall); // Stìna zùstává èerná
+    wall_right->setMaterial(mat_floor_wall);
     wall_right->getTransformation()
         .translate(glm::vec3(10.0f, 10.0f, 0.0f))
         .scale(glm::vec3(10.0f))
@@ -509,7 +506,7 @@ void Application::setupScene5(Scene* scene) {
     glm::vec3 topLightPos = glm::vec3(0.0f, 5.0f, -2.0f);
     scene->addPointLight(topLightPos, glm::vec3(0.15f, 0.15f, 0.15f), 1.0f, 0.09f, 0.032f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE); // Použijeme vaši `sphere` z .h
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE);
     DrawableObject* bulb = scene->getObject(scene->getObjectCount() - 1);
     bulb->setMaterial(mat_bulb);
     bulb->setUnlit(true);

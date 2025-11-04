@@ -1,7 +1,7 @@
 #include "ShaderProgram.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "Light.h"
+#include "Lights.h"
 #include "Material.h"
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
@@ -20,7 +20,7 @@ ShaderProgram::~ShaderProgram() {
     if (ID != 0) {
         glDeleteProgram(ID);
     }
-}
+} 
 
 void ShaderProgram::use() const {
     glUseProgram(ID);

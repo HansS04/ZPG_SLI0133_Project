@@ -1,11 +1,10 @@
 #pragma once
 
-class Light; // Dopøedná deklarace
+class Light;
 
 class ILightObserver {
 public:
     virtual ~ILightObserver() = default;
 
-    // Metoda, kterou Subject (Light) zavolá, když se zmìní
     virtual void onLightChanged(const Light* light) = 0;
 };

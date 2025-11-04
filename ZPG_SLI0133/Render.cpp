@@ -1,6 +1,5 @@
 #include "Render.h"
 
-// Includujeme vše potøebné pro bìh smyèky
 #include "Application.h"
 #include "InputController.h"
 #include "Scene.h"
