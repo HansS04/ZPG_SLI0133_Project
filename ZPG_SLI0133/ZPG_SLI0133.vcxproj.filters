@@ -71,6 +71,12 @@
     <ClCompile Include="tiny_obj_loader_impl.cpp">
       <Filter>Soubory zdrojů</Filter>
     </ClCompile>
+    <ClCompile Include="stb_image_impl.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureLoader.cpp">
+      <Filter>Soubory zdrojů</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h">
@@ -140,6 +146,9 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="sky_cube.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureLoader.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>

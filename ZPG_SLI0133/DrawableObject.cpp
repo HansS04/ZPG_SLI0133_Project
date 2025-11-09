@@ -26,6 +26,15 @@ void DrawableObject::draw() const {
 
     shaderProgram->setMaterial(*m_Material);
 
+    if (m_Material->diffuseTextureID != 0) {
+        shaderProgram->setBool("u_HasDiffuseTexture", true);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_Material->diffuseTextureID);
+    }
+    else {
+        shaderProgram->setBool("u_HasDiffuseTexture", false);
+    }
+
     glm::mat4 modelMatrix = transformation->getMatrix();
     shaderProgram->setMat4("u_ModelMatrix", modelMatrix);
     shaderProgram->setMat4("u_ViewMatrix", shaderProgram->getViewMatrix());
@@ -33,6 +42,7 @@ void DrawableObject::draw() const {
 
     model->draw();
 
+    glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
 }
 

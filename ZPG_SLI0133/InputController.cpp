@@ -32,6 +32,7 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
     if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4);
     if (glfwGetKey(m_Window, GLFW_KEY_5) == GLFW_PRESS) m_App.loadScene(5);
+    if (glfwGetKey(m_Window, GLFW_KEY_6) == GLFW_PRESS) m_App.loadScene(6);
 }
 
 void InputController::onKey(int key, int scancode, int action, int mods) {

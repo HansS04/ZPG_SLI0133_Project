@@ -52,8 +52,8 @@ void Scene::createShaders(const std::string& vertexShaderFile, const std::string
     camera->updateMatrices();
 }
 
-void Scene::addObject(const float* data, size_t size) {
-    std::unique_ptr<Model> m = std::make_unique<Model>(data, size);
+void Scene::addObject(const float* data, size_t size, int stride) {
+    std::unique_ptr<Model> m = std::make_unique<Model>(data, size, stride);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
     objects.push_back(std::move(obj));
 }

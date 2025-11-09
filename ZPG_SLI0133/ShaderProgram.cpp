@@ -14,6 +14,11 @@ ShaderProgram::ShaderProgram(Shader& vs, Shader& fs) {
     fs.attachShader(ID);
     glLinkProgram(ID);
     checkLinkErrors();
+
+    use();
+    setInt("u_DiffuseTexture", 0); // Nastavíme sampler u_DiffuseTexture na GL_TEXTURE0
+    glUseProgram(0);
+
 }
 
 ShaderProgram::~ShaderProgram() {
