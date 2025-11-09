@@ -26,16 +26,11 @@
 #include "bench.h" 
 #include "sphere.h"
 
-// --- ZDE JE OPRAVA CHYBY LINKERU ---
-// Definujeme globální '..._SIZE' promìnné, které linker hledá.
-// Pøedpokládáme, že plain.h a bench.h již definují své ..._SIZE
 extern const float PLAIN_VERTICES[];
 extern const size_t PLAIN_VERTICES_SIZE;
 extern const float BENCH_VERTICES[];
 extern const size_t BENCH_DATA_SIZE;
 
-// Tyto .h soubory zjevnì nedefinují své ..._SIZE promìnné,
-// takže je musíme definovat zde:
 extern const float SPHERE_VERTICES[];
 const size_t SPHERE_VERTICES_SIZE = sizeof(sphere);
 
@@ -44,13 +39,11 @@ const size_t TREE_DATA_SIZE = sizeof(tree);
 
 extern const float BUSHES_VERTICES[];
 const size_t BUSHES_DATA_SIZE = sizeof(bushes);
-// --- KONEC OPRAVY ---
 
 float rotationSpeed = 5.0f;
 float rotationAngle = 0.0f;
 bool direction = false;
 
-// 8D trojúhelník (Pos, Norm, UV)
 const float TEST_TRIANGLE[] = {
     0.0f,  1.0f,  0.0f,     0.0f, 0.0f, 1.0f,   0.5f, 1.0f,
    -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
@@ -110,6 +103,7 @@ Application::Application(int width, int height, const std::string& title)
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glViewport(0, 0, width, height);
 
     setupScenes();
@@ -147,8 +141,6 @@ void Application::setupScenes() {
     sceneInitializers.push_back([this](Scene* s) { setupScene2(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene3(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene4(s); });
-    sceneInitializers.push_back([this](Scene* s) { setupScene5(s); });
-    sceneInitializers.push_back([this](Scene* s) { setupScene6(s); });
 }
 
 void Application::loadScene(int index) {
@@ -167,13 +159,12 @@ void Application::setupScene0(Scene* s) {
     s->addDirLight(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     auto triMaterial = std::make_shared<Material>();
-    triMaterial->diffuse = glm::vec3(1.0f, 0.0f, 0.0f); // Èervená barva
+    triMaterial->diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
     triMaterial->ambient = glm::vec3(1.0f, 0.0f, 0.0f);
     triMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
     triMaterial->shininess = 32.0f;
-    // Žádná textura
 
-    s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, 8); // 8D
+    s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, 8);
     DrawableObject* obj = s->getFirstObject();
     if (obj) {
         obj->setMaterial(triMaterial);
@@ -181,14 +172,13 @@ void Application::setupScene0(Scene* s) {
     }
 }
 
-// const size_t SPHERE_VERTICES_SIZE = sizeof(sphere); // Již definováno globálnì
-
 void Application::setupScene1(Scene* scene) {
     scene->clearObjects();
+    scene->InitSkybox();
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
 
     auto sphereMaterial = std::make_shared<Material>();
-    sphereMaterial->diffuse = glm::vec3(0.9f, 0.9f, 0.9f); // Bílá barva
+    sphereMaterial->diffuse = glm::vec3(0.9f, 0.9f, 0.9f);
     sphereMaterial->ambient = glm::vec3(0.9f, 0.9f, 0.9f);
     sphereMaterial->specular = glm::vec3(1.0f, 1.0f, 1.0f);
     sphereMaterial->shininess = 64.0f;
@@ -201,25 +191,25 @@ void Application::setupScene1(Scene* scene) {
     const float OBJECT_Y_POS = 0.0f;
     const glm::vec3 LIGHT_POS(0.0f, 3.0f, 0.0f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s1 = scene->getObject(scene->getObjectCount() - 1);
     s1->setMaterial(sphereMaterial);
     s1->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s1->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s2 = scene->getObject(scene->getObjectCount() - 1);
     s2->setMaterial(sphereMaterial);
     s2->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s2->getTransformation().translate(glm::vec3(OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s3 = scene->getObject(scene->getObjectCount() - 1);
     s3->setMaterial(sphereMaterial);
     s3->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s3->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, -OBJECT_OFFSET));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s4 = scene->getObject(scene->getObjectCount() - 1);
     s4->setMaterial(sphereMaterial);
     s4->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
@@ -227,7 +217,7 @@ void Application::setupScene1(Scene* scene) {
 
     scene->addPointLight(LIGHT_POS, glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* lightBulb = scene->getObject(scene->getObjectCount() - 1);
     lightBulb->setMaterial(lightBulbMaterial);
     lightBulb->setUnlit(true);
@@ -247,48 +237,39 @@ float MOON_EARTH_DISTANCE = 2.4f;
 float earthOrbitAngle = 0.0f;
 float moonOrbitAngle = 0.0f;
 
-// --- ZDE JE UPRAVENÁ SCÉNA 2 ---
 void Application::setupScene2(Scene* scene) {
     scene->clearObjects();
-    // Ambientní svìtlo necháme, aby stíny nebyly úplnì èerné
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
 
-    // Materiál Slunce: ŽLUTÁ (podle vašeho pøání)
     auto sunMaterial = std::make_shared<Material>();
     sunMaterial->diffuse = glm::vec3(1.0f, 1.0f, 0.6f);
-    // sunMaterial->diffuseTextureID = TextureLoader::LoadTexture("../assets/sun.jpg"); // Odebráno
 
-    // Materiál Zemì: MODRÁ (podle vašeho pøání)
     auto earthMaterial = std::make_shared<Material>();
     earthMaterial->diffuse = glm::vec3(0.0f, 0.0f, 0.8f);
-    earthMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f); // Necháme trochu lesku
+    earthMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
     earthMaterial->shininess = 32.0f;
-    // earthMaterial->diffuseTextureID = TextureLoader::LoadTexture("../assets/earth.jpg"); // Odebráno
 
-    // Materiál Mìsíce: ŠEDÁ (podle vašeho pøání)
     auto moonMaterial = std::make_shared<Material>();
     moonMaterial->diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
     moonMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
     moonMaterial->shininess = 8.0f;
-    // moonMaterial->diffuseTextureID = TextureLoader::LoadTexture("../assets/moon.jpg"); // Odebráno
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* sun = scene->getObject(scene->getObjectCount() - 1);
     sun->setMaterial(sunMaterial);
-    sun->setUnlit(true); // Slunce svítí samo, to je správnì
+    sun->setUnlit(true);
     sun->getTransformation().scale(glm::vec3(2.5f));
     sun->getTransformation().translate(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    // Svìtlo Slunce musí být BÍLÉ, aby správnì osvítilo modrou Zemi
     scene->addPointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), 1.0f, 0.007f, 0.0002f);
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* earth = scene->getObject(scene->getObjectCount() - 1);
     earth->setMaterial(earthMaterial);
     earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
     earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
 
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* moon = scene->getObject(scene->getObjectCount() - 1);
     moon->setMaterial(moonMaterial);
     moon->getTransformation().scale(glm::vec3(SCALE_MOON));
@@ -299,312 +280,193 @@ void Application::setupScene2(Scene* scene) {
     scene->getCamera().setAlpha(glm::radians(-10.0f));
     scene->getCamera().updateMatrices();
 }
-void Application::setupScene3(Scene* scene) {
-    // --- 1. Definice materiálù ---
 
-    // Materiál pro TRÁVU (texturovaný)
+void Application::setupScene3(Scene* scene) {
+    scene->clearObjects();
+
     auto mat_grass = std::make_shared<Material>();
-    mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Bílá, aby se násobila s texturou
-    mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f); // Tráva se neleskne
+    mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f);
+    mat_grass->shininess = 16.0f;
     mat_grass->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/grass.png");
 
-    // Materiál pro CESTU (texturovaný)
-    auto mat_path = std::make_shared<Material>();
-    mat_path->diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Bílá
-    mat_path->specular = glm::vec3(0.1f, 0.1f, 0.1f); // Mírný odlesk
-    mat_path->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/path.jpeg"); // Pøedpokládám, že máte texturu cesty
+    auto mat_swamp = std::make_shared<Material>();
+    mat_swamp->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_swamp->specular = glm::vec3(0.2f, 0.2f, 0.1f);
+    mat_swamp->shininess = 8.0f;
+    mat_swamp->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/mud.jpg");
 
-    // Materiál pro SHREKA (texturovaný)
     auto mat_shrek = std::make_shared<Material>();
     mat_shrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f); // Trochu se leskne
+    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
     mat_shrek->shininess = 32.0f;
     mat_shrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
 
-    // Materiály pro 6D modely (beze zmìny)
+    auto mat_fiona = std::make_shared<Material>();
+    mat_fiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_fiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_fiona->shininess = 32.0f;
+    mat_fiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
+
+    auto mat_toilet = std::make_shared<Material>();
+    mat_toilet->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_toilet->specular = glm::vec3(0.8f, 0.8f, 0.8f);
+    mat_toilet->shininess = 128.0f;
+    mat_toilet->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/toiled.jpg");
+
     auto mat_tree = std::make_shared<Material>();
-    mat_tree->diffuse = glm::vec3(0.1f, 0.4f, 0.1f); // Tmavì zelená
+    mat_tree->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
     mat_tree->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
     mat_tree->specular = glm::vec3(0.1f, 0.1f, 0.1f);
     mat_tree->shininess = 16.0f;
 
-    auto mat_bench = std::make_shared<Material>();
-    mat_bench->diffuse = glm::vec3(0.55f, 0.27f, 0.07f); // Hnìdá
-    mat_bench->ambient = glm::vec3(0.55f, 0.27f, 0.07f);
-    mat_bench->specular = glm::vec3(0.2f, 0.2f, 0.2f);
-    mat_bench->shininess = 32.0f;
-
     auto mat_firefly_body = std::make_shared<Material>();
-    mat_firefly_body->diffuse = glm::vec3(1.0f, 1.0f, 1.0f); // Bílá
+    mat_firefly_body->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 
-    // --- 2. Konstanty scény (beze zmìny) ---
-    const float SCENE_LENGTH = 100.0f;
-    const float PATH_WIDTH = 2.0f;
-    const float FOREST_WIDTH = 10.0f;
-    const int NUM_TREES = 75;
-    const int NUM_BUSHES = 75;
-    const int NUM_BENCHES = 5;
-    const float OBJ_SCALE = 0.35f;
-    const float BENCH_SCALE = 0.6f;
-    const float PATH_Y_OFFSET = 0.001f;
-    const float MIN_X_DIST = PATH_WIDTH / 2.0f + 1.0f;
-    const float MAX_X_DIST = FOREST_WIDTH - 0.5f;
+    auto mat_skydome = std::make_shared<Material>();
+    mat_skydome->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_skydome->diffuseTextureID = TextureLoader::LoadTexture("assets/sky/skydome.png");
 
-    // --- 3. Vytvoøení objektù ---
-
-    // Pøidání podlahy (tráva) - používá 8D model 'plain'
-    scene->addObject(plain, sizeof(plain), 8);
-    DrawableObject* groundObj = scene->getObject(scene->getObjectCount() - 1);
-    groundObj->setMaterial(mat_grass);
-    groundObj->getTransformation().scale(glm::vec3(FOREST_WIDTH, 1.0f, SCENE_LENGTH / 2.0f));
-
-    // Pøidání cesty - používá 8D model 'plain'
-    scene->addObject(plain, sizeof(plain), 8);
-    DrawableObject* pathObj = scene->getObject(scene->getObjectCount() - 1);
-    pathObj->setMaterial(mat_path);
-    pathObj->getTransformation().scale(glm::vec3(PATH_WIDTH / 2.0f, 1.0f, SCENE_LENGTH / 2.0f));
-    pathObj->getTransformation().translate(glm::vec3(0.0f, PATH_Y_OFFSET, 0.0f));
-
-    std::uniform_real_distribution<float> randZ_dist(-SCENE_LENGTH / 2.0f, SCENE_LENGTH / 2.0f);
-    std::uniform_real_distribution<float> randX_dist(MIN_X_DIST, MAX_X_DIST);
-    std::uniform_int_distribution<int> randSign_dist(0, 1);
-
-    // Smyèky pro stromy, keøe, lavièky (beze zmìny, používají 6D data)
-    for (int i = 0; i < NUM_TREES; ++i) {
-        float randZ = randZ_dist(m_RandomEngine);
-        float randXOffset = randX_dist(m_RandomEngine);
-        if (randSign_dist(m_RandomEngine) == 0) randXOffset = -randXOffset;
-        scene->addObject(tree, TREE_DATA_SIZE, 6); // 6D
-        DrawableObject* treeObj = scene->getObject(scene->getObjectCount() - 1);
-        treeObj->setMaterial(mat_tree);
-        treeObj->getTransformation().translate(glm::vec3(randXOffset, 0.0f, randZ));
-        treeObj->getTransformation().scale(glm::vec3(OBJ_SCALE));
-    }
-    for (int i = 0; i < NUM_BUSHES; ++i) {
-        float randZ = randZ_dist(m_RandomEngine);
-        float randXOffset = randX_dist(m_RandomEngine);
-        if (randSign_dist(m_RandomEngine) == 0) randXOffset = -randXOffset;
-        scene->addObject(bushes, BUSHES_DATA_SIZE, 6); // 6D
-        DrawableObject* bushObj = scene->getObject(scene->getObjectCount() - 1);
-        bushObj->setMaterial(mat_tree);
-        bushObj->getTransformation().translate(glm::vec3(randXOffset, 0.0f, randZ));
-        bushObj->getTransformation().scale(glm::vec3(OBJ_SCALE));
-    }
-    const float BENCH_SPACING = SCENE_LENGTH / (NUM_BENCHES + 1);
-    float currentBenchZ = -(SCENE_LENGTH / 2.0f) + BENCH_SPACING;
-    const float BENCH_X_OFFSET = PATH_WIDTH / 2.0f + 0.1f;
-    for (int i = 0; i < NUM_BENCHES; ++i) {
-        scene->addObject(bench, BENCH_DATA_SIZE, 6); // 6D
-        DrawableObject* benchL = scene->getObject(scene->getObjectCount() - 1);
-        benchL->setMaterial(mat_bench);
-        benchL->getTransformation().translate(glm::vec3(-BENCH_X_OFFSET - 0.75f, PATH_Y_OFFSET, currentBenchZ));
-        benchL->getTransformation().scale(glm::vec3(BENCH_SCALE));
-        benchL->getTransformation().rotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-        scene->addObject(bench, BENCH_DATA_SIZE, 6); // 6D
-        DrawableObject* benchR = scene->getObject(scene->getObjectCount() - 1);
-        benchR->setMaterial(mat_bench);
-        benchR->getTransformation().translate(glm::vec3(BENCH_X_OFFSET + 0.75f, PATH_Y_OFFSET, currentBenchZ));
-        benchR->getTransformation().scale(glm::vec3(BENCH_SCALE));
-        benchR->getTransformation().rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        currentBenchZ += BENCH_SPACING;
-    }
-
-    // Svìtla (beze zmìny)
     scene->setAmbientLight(glm::vec3(0.02f, 0.02f, 0.05f));
     scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.15f));
 
-    // Svìtlušky (beze zmìny)
-    std::cout << "Pridavam svetlusky do sceny 3..." << std::endl;
-    const int numFireflies = 8;
+    const float sceneSize = 50.0f;
+    const float swampSize = 10.0f;
+    const float treeScale = 0.5f;
+
+    scene->addObject(plain, sizeof(plain), 8);
+    DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
+    ground->setMaterial(mat_grass);
+    ground->getTransformation().scale(glm::vec3(sceneSize / 2.0f));
+
+    scene->addObject(plain, sizeof(plain), 8);
+    DrawableObject* swamp = scene->getObject(scene->getObjectCount() - 1);
+    swamp->setMaterial(mat_swamp);
+    swamp->getTransformation()
+        .scale(glm::vec3(swampSize / 2.0f))
+        .translate(glm::vec3(0.0f, 0.01f, 0.0f));
+
+    scene->addObject("assets/shrek/shrek.obj");
+    DrawableObject* shrek = scene->getObject(scene->getObjectCount() - 1);
+    shrek->setMaterial(mat_shrek);
+    shrek->getTransformation()
+        .translate(glm::vec3(-1.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f));
+
+    scene->addObject("assets/shrek/fiona.obj");
+    DrawableObject* fiona = scene->getObject(scene->getObjectCount() - 1);
+    fiona->setMaterial(mat_fiona);
+    fiona->getTransformation()
+        .translate(glm::vec3(1.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f));
+
+    scene->addObject("assets/shrek/toiled.obj");
+    DrawableObject* toilet = scene->getObject(scene->getObjectCount() - 1);
+    toilet->setMaterial(mat_toilet);
+    toilet->getTransformation()
+        .translate(glm::vec3(0.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f));
+
+    scene->addObject("assets/sky/skydome.obj");
+    DrawableObject* skydome = scene->getObject(scene->getObjectCount() - 1);
+    skydome->setMaterial(mat_skydome);
+    skydome->setUnlit(true);
+    skydome->getTransformation().scale(glm::vec3(sceneSize * 0.8f));
+
+    const int numTrees = 150;
+    std::uniform_real_distribution<float> randPos(-sceneSize / 2.0f, sceneSize / 2.0f);
+
+    for (int i = 0; i < numTrees; ++i) {
+        float x = randPos(m_RandomEngine);
+        float z = randPos(m_RandomEngine);
+
+        if (std::abs(x) < (swampSize / 2.0f + 1.0f) && std::abs(z) < (swampSize / 2.0f + 1.0f)) {
+            continue;
+        }
+
+        scene->addObject(tree, TREE_DATA_SIZE, 6);
+        DrawableObject* treeObj = scene->getObject(scene->getObjectCount() - 1);
+        treeObj->setMaterial(mat_tree);
+        treeObj->getTransformation()
+            .translate(glm::vec3(x, 0.0f, z))
+            .scale(glm::vec3(treeScale));
+    }
+
+    const int numFireflies = 15;
     const glm::vec3 fireflyLightColor = glm::vec3(1.0f, 1.2f, 0.5f);
     const float con = 1.0f;
     const float lin = 1.0f;
     const float quad = 2.0f;
-    std::uniform_real_distribution<float> randY_dist(0.5f, 2.5f);
+    std::uniform_real_distribution<float> randEdge(-swampSize / 2.0f, swampSize / 2.0f);
+    std::uniform_real_distribution<float> randY_dist(0.5f, 2.0f);
+    std::uniform_int_distribution<int> randSide(0, 3);
+
     for (int i = 0; i < numFireflies; ++i) {
-        float x = randX_dist(m_RandomEngine);
-        if (randSign_dist(m_RandomEngine) == 0) x = -x;
+        float x = 0.0f, z = 0.0f;
+        int side = randSide(m_RandomEngine);
+        if (side == 0) { x = -swampSize / 2.0f; z = randEdge(m_RandomEngine); }
+        else if (side == 1) { x = swampSize / 2.0f; z = randEdge(m_RandomEngine); }
+        else if (side == 2) { z = -swampSize / 2.0f; x = randEdge(m_RandomEngine); }
+        else { z = swampSize / 2.0f; x = randEdge(m_RandomEngine); }
         float y = randY_dist(m_RandomEngine);
-        float z = randZ_dist(m_RandomEngine);
+
         scene->addFirefly(glm::vec3(x, y, z), fireflyLightColor, con, lin, quad);
-        scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
+
+        scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
         DrawableObject* fireflyBody = scene->getObject(scene->getObjectCount() - 1);
         fireflyBody->setMaterial(mat_firefly_body);
         fireflyBody->setUnlit(true);
         scene->addFireflyBody(fireflyBody);
     }
 
-    // --- PØIDÁNÍ SHREKA ---
-    scene->addObject("assets/shrek/shrek.obj"); // Naèteme .obj model
-    DrawableObject* shrek = scene->getObject(scene->getObjectCount() - 1);
-    shrek->setMaterial(mat_shrek); // Pøiøadíme Shrek materiál
+    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 15.0f));
+}
+
+void Application::setupScene4(Scene* s) {
+    s->clearObjects();
+    s->InitSkybox();
+
+    s->setAmbientLight(glm::vec3(0.2f, 0.2f, 0.2f));
+    s->addDirLight(glm::vec3(-0.5f, -1.0f, -0.5f), glm::vec3(0.8f, 0.8f, 0.8f));
+
+    auto mat_shrek = std::make_shared<Material>();
+    mat_shrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_shrek->shininess = 32.0f;
+    mat_shrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
+
+    auto mat_fiona = std::make_shared<Material>();
+    mat_fiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_fiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_fiona->shininess = 32.0f;
+    mat_fiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
+
+    auto mat_toilet = std::make_shared<Material>();
+    mat_toilet->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_toilet->specular = glm::vec3(0.8f, 0.8f, 0.8f);
+    mat_toilet->shininess = 128.0f;
+    mat_toilet->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/toiled.jpg");
+
+    s->addObject("assets/shrek/shrek.obj");
+    DrawableObject* shrek = s->getObject(s->getObjectCount() - 1);
+    shrek->setMaterial(mat_shrek);
     shrek->getTransformation()
-        .translate(glm::vec3(0.0f, 0.0f, 0.0f)) // Uprostøed cesty v poèátku
-        .scale(glm::vec3(0.5f)); // Zmenšíme ho (upravte podle potøeby)
-    // --- KONEC PØIDÁNÍ ---
+        .translate(glm::vec3(-1.0f, 0.0f, -2.0f))
+        .scale(glm::vec3(0.5f));
 
-    scene->getCamera().setPosition(glm::vec3(0.0f, 1.7f, 5.0f));
-}
+    s->addObject("assets/shrek/fiona.obj");
+    DrawableObject* fiona = s->getObject(s->getObjectCount() - 1);
+    fiona->setMaterial(mat_fiona);
+    fiona->getTransformation()
+        .translate(glm::vec3(1.0f, 0.0f, -2.0f))
+        .scale(glm::vec3(0.5f));
 
-void Application::setupScene4(Scene* scene) {
-    scene->clearObjects();
-    scene->setAmbientLight(glm::vec3(0.05f, 0.05f, 0.1f));
-    scene->addDirLight(glm::vec3(0.5f, -1.0f, -0.5f), glm::vec3(0.1f, 0.1f, 0.15f));
+    s->addObject("assets/shrek/toiled.obj");
+    DrawableObject* toilet = s->getObject(s->getObjectCount() - 1);
+    toilet->setMaterial(mat_toilet);
+    toilet->getTransformation()
+        .translate(glm::vec3(0.0f, 0.0f, -3.0f))
+        .scale(glm::vec3(0.5f));
 
-    auto mat_house = std::make_shared<Material>();
-    mat_house->diffuse = glm::vec3(0.8f, 0.7f, 0.6f);
-    mat_house->ambient = glm::vec3(0.8f, 0.7f, 0.6f);
-    mat_house->specular = glm::vec3(0.2f, 0.2f, 0.2f);
-    mat_house->shininess = 16.0f;
-    // mat_house->diffuseTextureID = TextureLoader::LoadTexture("../assets/house.png");
-
-    auto mat_bulb = std::make_shared<Material>();
-    mat_bulb->diffuse = glm::vec3(1.0f, 0.8f, 0.0f);
-
-    scene->addObject("house.obj");
-    DrawableObject* house = scene->getObject(scene->getObjectCount() - 1);
-    if (house) {
-        house->setMaterial(mat_house);
-        house->getTransformation().translate(glm::vec3(0.0f, 0.0f, -5.0f));
-    }
-
-    glm::vec3 porchLightPos = glm::vec3(-1.5f, 1.0f, -4.0f);
-    glm::vec3 porchLightColor = glm::vec3(1.0f, 0.8f, 0.0f);
-    scene->addPointLight(porchLightPos, porchLightColor, 1.0f, 0.09f, 0.032f);
-
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
-    DrawableObject* bulb = scene->getObject(scene->getObjectCount() - 1);
-    if (bulb) {
-        bulb->setMaterial(mat_bulb);
-        bulb->setUnlit(true);
-        bulb->getTransformation().translate(porchLightPos).scale(glm::vec3(0.1f));
-    }
-
-    scene->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
-}
-
-void Application::setupScene5(Scene* scene) {
-    scene->clearObjects();
-
-    auto mat_floor = std::make_shared<Material>();
-    mat_floor->diffuse = glm::vec3(0.9f, 0.9f, 0.9f);
-    mat_floor->ambient = glm::vec3(0.9f, 0.9f, 0.9f);
-    mat_floor->specular = glm::vec3(0.3f, 0.3f, 0.3f);
-    mat_floor->shininess = 32.0f;
-    // mat_floor->diffuseTextureID = TextureLoader::LoadTexture("../assets/floor.jpg");
-
-    auto mat_wall = std::make_shared<Material>();
-    mat_wall->diffuse = glm::vec3(0.02f, 0.02f, 0.02f);
-    mat_wall->ambient = glm::vec3(0.0f, 0.0f, 0.0f);
-    mat_wall->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_wall->shininess = 16.0f;
-    // mat_wall->diffuseTextureID = TextureLoader::LoadTexture("../assets/wall.jpg");
-
-    auto mat_formula = std::make_shared<Material>();
-    mat_formula->diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
-    mat_formula->ambient = glm::vec3(1.0f, 0.0f, 0.0f);
-    mat_formula->specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_formula->shininess = 512.0f;
-    // mat_formula->diffuseTextureID = TextureLoader::LoadTexture("../assets/formula.png");
-
-    auto mat_bulb = std::make_shared<Material>();
-    mat_bulb->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-
-    scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-
-    scene->addObject(plain, sizeof(plain), 8); // 8D
-    DrawableObject* floor = scene->getObject(scene->getObjectCount() - 1);
-    floor->setMaterial(mat_floor);
-    floor->getTransformation().scale(glm::vec3(10.0f));
-
-    scene->addObject(plain, sizeof(plain), 8); // 8D
-    DrawableObject* wall_back = scene->getObject(scene->getObjectCount() - 1);
-    wall_back->setMaterial(mat_wall);
-    wall_back->getTransformation()
-        .translate(glm::vec3(0.0f, 10.0f, -10.0f))
-        .scale(glm::vec3(10.0f))
-        .rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-    scene->addObject(plain, sizeof(plain), 8); // 8D
-    DrawableObject* wall_left = scene->getObject(scene->getObjectCount() - 1);
-    wall_left->setMaterial(mat_wall);
-    wall_left->getTransformation()
-        .translate(glm::vec3(-10.0f, 10.0f, 0.0f))
-        .scale(glm::vec3(10.0f))
-        .rotate(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    scene->addObject(plain, sizeof(plain), 8); // 8D
-    DrawableObject* wall_right = scene->getObject(scene->getObjectCount() - 1);
-    wall_right->setMaterial(mat_wall);
-    wall_right->getTransformation()
-        .translate(glm::vec3(10.0f, 10.0f, 0.0f))
-        .scale(glm::vec3(10.0f))
-        .rotate(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    scene->addObject("formula1.obj");
-    DrawableObject* formula = scene->getObject(scene->getObjectCount() - 1);
-    formula->setMaterial(mat_formula);
-    formula->getTransformation()
-        .translate(glm::vec3(0.0f, 0.0f, -2.0f))
-        .scale(glm::vec3(0.1f));
-
-    glm::vec3 topLightPos = glm::vec3(0.0f, 5.0f, -2.0f);
-    scene->addPointLight(topLightPos, glm::vec3(0.15f, 0.15f, 0.15f), 1.0f, 0.09f, 0.032f);
-
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6); // 6D
-    DrawableObject* bulb = scene->getObject(scene->getObjectCount() - 1);
-    bulb->setMaterial(mat_bulb);
-    bulb->setUnlit(true);
-    bulb->getTransformation().translate(topLightPos).scale(glm::vec3(0.2f));
-
-    glm::vec3 target = glm::vec3(0.0f, 0.5f, -2.0f);
-    const float c = 1.0f, l = 0.045f, q = 0.0075f;
-    const float cut = glm::cos(glm::radians(20.0f));
-    const float outerCut = glm::cos(glm::radians(25.0f));
-
-    glm::vec3 pos1 = glm::vec3(-5.0f, 2.0f, 5.0f);
-    scene->addSpotLight(pos1, glm::normalize(target - pos1), glm::vec3(5.0f, 0.0f, 0.0f), c, l, q, cut, outerCut);
-
-    glm::vec3 pos2 = glm::vec3(5.0f, 2.0f, 5.0f);
-    scene->addSpotLight(pos2, glm::normalize(target - pos2), glm::vec3(0.0f, 5.0f, 0.0f), c, l, q, cut, outerCut);
-
-    glm::vec3 pos3 = glm::vec3(-2.0f, 1.0f, 7.0f);
-    scene->addSpotLight(pos3, glm::normalize(target - pos3), glm::vec3(0.0f, 0.0f, 5.0f), c, l, q, cut, outerCut);
-
-    glm::vec3 pos4 = glm::vec3(2.0f, 1.0f, 7.0f);
-    scene->addSpotLight(pos4, glm::normalize(target - pos4), glm::vec3(5.0f, 5.0f, 0.0f), c, l, q, cut, outerCut);
-
-    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 10.0f));
-}
-
-void Application::setupScene6(Scene* scene) {
-    scene->clearObjects();
-
-    scene->setAmbientLight(glm::vec3(0.2f, 0.2f, 0.2f));
-    scene->addDirLight(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
-
-    auto mat_floor = std::make_shared<Material>();
-    mat_floor->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_floor->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_floor->shininess = 32.0f;
-    mat_floor->diffuseTextureID = TextureLoader::LoadTexture("../assets/wooden_fence.png");
-
-    auto mat_tri = std::make_shared<Material>();
-    mat_tri->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_tri->specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    mat_tri->shininess = 64.0f;
-    mat_tri->diffuseTextureID = TextureLoader::LoadTexture("../assets/wall.jpg");
-
-    scene->addObject(plain, sizeof(plain), 8);
-    DrawableObject* floor = scene->getObject(scene->getObjectCount() - 1);
-    floor->setMaterial(mat_floor);
-    floor->getTransformation().scale(glm::vec3(5.0f));
-
-    scene->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, 8);
-    DrawableObject* tri = scene->getObject(scene->getObjectCount() - 1);
-    tri->setMaterial(mat_tri);
-    tri->getTransformation().translate(glm::vec3(0.0f, 2.0f, 0.0f)).scale(glm::vec3(2.0f));
-
-    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 5.0f));
+    s->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
 }

@@ -164,6 +164,8 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <None Include="basic_Lambert_fragmentShader.frag" />
     <None Include="basic_Phong_fragmentShader.frag" />
     <None Include="basic_vertexShader.vert" />
+    <None Include="skybox.frag" />
+    <None Include="skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
@@ -183,6 +185,7 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <ClCompile Include="TransformationLeafs.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Models\plain2.h" />
     <ClInclude Include="Application.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DirLight.h" />

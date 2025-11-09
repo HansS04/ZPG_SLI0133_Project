@@ -30,6 +30,12 @@
     <None Include="basic_vertexShader.vert">
       <Filter>Zdrojové soubory</Filter>
     </None>
+    <None Include="skybox.vert">
+      <Filter>Zdrojové soubory</Filter>
+    </None>
+    <None Include="skybox.frag">
+      <Filter>Zdrojové soubory</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp">
@@ -149,6 +155,9 @@
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
     <ClInclude Include="TextureLoader.h">
+      <Filter>Hlavičkové soubory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Models\plain2.h">
       <Filter>Hlavičkové soubory</Filter>
     </ClInclude>
   </ItemGroup>

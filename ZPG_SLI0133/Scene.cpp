@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Shader.h" 
 #include "Light.h"
+#include "TextureLoader.h" 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cmath>
@@ -30,6 +31,37 @@ Scene::Scene()
         glm::cos(glm::radians(12.5f)),
         glm::cos(glm::radians(15.5f))
     );
+
+}
+
+// --- ZCELA NOVÁ METODA ---
+void Scene::InitSkybox()
+{
+    // 1. Vytvoøení shader programu
+    auto vert = std::make_unique<Shader>(GL_VERTEX_SHADER, "skybox.vert");
+    auto frag = std::make_unique<Shader>(GL_FRAGMENT_SHADER, "skybox.frag");
+    // Musí být shared_ptr, aby fungoval s DrawableObject
+    skyboxShader = std::make_shared<ShaderProgram>(*vert, *frag);
+
+    // 2. Naètení modelu krychle z .obj
+    // Používáme relativní cestu, kterou vidím v tvé struktuøe souborù
+    auto model = std::make_unique<Model>("assets/sky/skybox.obj");
+
+    // 3. Vytvoøení DrawableObject, který sváže model a skybox shader
+    skyboxObject = std::make_unique<DrawableObject>(std::move(model), skyboxShader);
+
+    // 4. Naètení cubemap textury (6 obrázkù)
+    std::vector<std::string> faces =
+    {
+        "assets/cubemap/posx.jpg",
+        "assets/cubemap/negx.jpg",
+        "assets/cubemap/posy.jpg",
+        "assets/cubemap/negy.jpg",
+        "assets/cubemap/posz.jpg",
+        "assets/cubemap/negz.jpg"
+    };
+    // Tuto funkci musíš pøidat do TextureLoader.cpp/.h
+    cubemapTexture = TextureLoader::loadCubemap(faces);
 }
 
 void Scene::createShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
@@ -73,10 +105,41 @@ void Scene::clearObjects() {
     m_FireflyBodyPtrs.clear();
 }
 
+// --- ZCELA NOVÁ METODA ---
+void Scene::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const
+{
+    // TATO ØÁDKA JE NOVÁ POJISTKA
+    if (!skyboxShader || !skyboxObject) return;
+    glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_FALSE);
 
+    skyboxShader->use();
+    skyboxShader->setMat4("view", viewMatrix);
+    skyboxShader->setMat4("projection", projectionMatrix);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    skyboxShader->setInt("skybox", 0);
+
+    // Zavoláme draw na našem skybox objektu
+    // Ten už má v sobì správný model i shader
+    skyboxObject->draw();
+
+    glDepthMask(GL_TRUE);
+    glDepthFunc(GL_LESS);
+}
+
+// --- UPRAVENÁ METODA RENDER ---
 void Scene::render() const {
     if (!camera) return;
 
+    glm::mat4 viewMatrix = camera->getViewMatrix();
+    glm::mat4 projectionMatrix = camera->getProjectionMatrix();
+
+    // Vykreslíme skybox jako první
+    DrawSkybox(viewMatrix, projectionMatrix);
+
+    // Zbytek vykreslování scény
     if (colorShaderProgram) {
         colorShaderProgram->use();
 
@@ -90,7 +153,7 @@ void Scene::render() const {
     for (const auto& obj : objects) {
         obj->draw();
     }
-}
+} // <-- TATO ZÁVORKA CHYBÌLA
 
 extern float earthOrbitAngle;
 extern float moonOrbitAngle;
