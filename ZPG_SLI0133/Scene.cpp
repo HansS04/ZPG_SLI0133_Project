@@ -7,6 +7,8 @@
 #include "Shader.h" 
 #include "Light.h"
 #include "TextureLoader.h" 
+#include "tree.h"
+#include "Material.h" 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cmath>
@@ -34,23 +36,16 @@ Scene::Scene()
 
 }
 
-// --- ZCELA NOVÁ METODA ---
 void Scene::InitSkybox()
 {
-    // 1. Vytvoøení shader programu
     auto vert = std::make_unique<Shader>(GL_VERTEX_SHADER, "skybox.vert");
     auto frag = std::make_unique<Shader>(GL_FRAGMENT_SHADER, "skybox.frag");
-    // Musí být shared_ptr, aby fungoval s DrawableObject
     skyboxShader = std::make_shared<ShaderProgram>(*vert, *frag);
 
-    // 2. Naètení modelu krychle z .obj
-    // Používáme relativní cestu, kterou vidím v tvé struktuøe souborù
     auto model = std::make_unique<Model>("assets/sky/skybox.obj");
 
-    // 3. Vytvoøení DrawableObject, který sváže model a skybox shader
     skyboxObject = std::make_unique<DrawableObject>(std::move(model), skyboxShader);
 
-    // 4. Naètení cubemap textury (6 obrázkù)
     std::vector<std::string> faces =
     {
         "assets/cubemap/posx.jpg",
@@ -60,7 +55,6 @@ void Scene::InitSkybox()
         "assets/cubemap/posz.jpg",
         "assets/cubemap/negz.jpg"
     };
-    // Tuto funkci musíš pøidat do TextureLoader.cpp/.h
     cubemapTexture = TextureLoader::loadCubemap(faces);
 }
 
@@ -87,12 +81,20 @@ void Scene::createShaders(const std::string& vertexShaderFile, const std::string
 void Scene::addObject(const float* data, size_t size, int stride) {
     std::unique_ptr<Model> m = std::make_unique<Model>(data, size, stride);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
+
+    m_ObjectCounter++;
+    obj->setID(m_ObjectCounter);
+
     objects.push_back(std::move(obj));
 }
 
 void Scene::addObject(const char* modelName) {
     std::unique_ptr<Model> m = std::make_unique<Model>(modelName);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
+
+    m_ObjectCounter++;
+    obj->setID(m_ObjectCounter);
+
     objects.push_back(std::move(obj));
 }
 
@@ -105,10 +107,8 @@ void Scene::clearObjects() {
     m_FireflyBodyPtrs.clear();
 }
 
-// --- ZCELA NOVÁ METODA ---
 void Scene::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const
 {
-    // TATO ØÁDKA JE NOVÁ POJISTKA
     if (!skyboxShader || !skyboxObject) return;
     glDepthFunc(GL_LEQUAL);
     glDepthMask(GL_FALSE);
@@ -121,25 +121,25 @@ void Scene::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
     skyboxShader->setInt("skybox", 0);
 
-    // Zavoláme draw na našem skybox objektu
-    // Ten už má v sobì správný model i shader
     skyboxObject->draw();
 
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
 }
 
-// --- UPRAVENÁ METODA RENDER ---
 void Scene::render() const {
     if (!camera) return;
 
     glm::mat4 viewMatrix = camera->getViewMatrix();
     glm::mat4 projectionMatrix = camera->getProjectionMatrix();
 
-    // Vykreslíme skybox jako první
-    DrawSkybox(viewMatrix, projectionMatrix);
+    glEnable(GL_STENCIL_TEST);
 
-    // Zbytek vykreslování scény
+    glStencilMask(0x00);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    DrawSkybox(viewMatrix, projectionMatrix);
+    glStencilMask(0xFF);
+
     if (colorShaderProgram) {
         colorShaderProgram->use();
 
@@ -150,10 +150,15 @@ void Scene::render() const {
         colorShaderProgram->setFlashlight(*m_Flashlight, m_FlashlightOn);
     }
 
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
     for (const auto& obj : objects) {
+        glStencilFunc(GL_ALWAYS, obj->getID(), 0xFF);
         obj->draw();
     }
-} // <-- TATO ZÁVORKA CHYBÌLA
+
+    glDisable(GL_STENCIL_TEST);
+}
 
 extern float earthOrbitAngle;
 extern float moonOrbitAngle;
@@ -278,4 +283,50 @@ void Scene::addFireflyBody(DrawableObject* body) {
 void Scene::toggleFlashlight() {
     m_FlashlightOn = !m_FlashlightOn;
     std::cout << "Baterka " << (m_FlashlightOn ? "ZAPNUTA" : "VYPNUTA") << std::endl;
+}
+
+DrawableObject* Scene::getObjectByID(unsigned int id) {
+    for (const auto& obj : objects) {
+        if (obj->getID() == id) {
+            return obj.get();
+        }
+    }
+    return nullptr;
+}
+
+void Scene::selectObjectByID(unsigned int id) {
+    DrawableObject* selected = getObjectByID(id);
+    if (selected) {
+        std::cout << "Vybran objekt s ID: " << id << std::endl;
+        //selected->getTransformation().scale(glm::vec3(0.8f));
+    }
+    else {
+        std::cout << "Kliknuto do prazdna (ID 0)." << std::endl;
+    }
+}
+
+void Scene::addTreeAt(glm::vec3 position) {
+    if (!m_TreeMaterial) {
+        m_TreeMaterial = std::make_shared<Material>();
+        m_TreeMaterial->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_TreeMaterial->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_TreeMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_TreeMaterial->shininess = 16.0f;
+    }
+
+    std::unique_ptr<Model> m = std::make_unique<Model>(tree, sizeof(tree), 6);
+
+    std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
+
+    m_ObjectCounter++;
+    obj->setID(m_ObjectCounter);
+
+    obj->setMaterial(m_TreeMaterial);
+    obj->getTransformation()
+        .translate(position)
+        .scale(glm::vec3(0.5f));
+
+    objects.push_back(std::move(obj));
+
+    printf("Novy strom pridan na pozici: %f, %f, %f\n", position.x, position.y, position.z);
 }

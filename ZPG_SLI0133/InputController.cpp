@@ -3,6 +3,7 @@
 #include "Camera.h" 
 #include <glm/gtc/constants.hpp>
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 InputController::InputController(Application& app, GLFWwindow* window, float initialX, float initialY)
     : m_App(app), m_Window(window), m_LastX(initialX), m_LastY(initialY) {
@@ -54,6 +55,51 @@ void InputController::onMouseButton(int button, int action, int mods) {
             m_RightButtonPressed = false;
             m_FirstMouse = true;
             glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        Scene* scene = m_App.getActiveScene();
+        if (!scene) return;
+        Camera& camera = scene->getCamera();
+
+        double xpos, ypos;
+        glfwGetCursorPos(m_Window, &xpos, &ypos);
+        int width, height;
+        glfwGetWindowSize(m_Window, &width, &height);
+
+        if (width == 0 || height == 0) return;
+
+        GLint x = (GLint)xpos;
+        GLint y = (GLint)ypos;
+        int newy = height - y;
+
+        GLfloat depth;
+        GLuint index;
+
+        glReadPixels(x, newy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+        glReadPixels(x, newy, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+
+        GLuint objectID = index & 0xFF;
+
+        if (objectID > 0) {
+            scene->selectObjectByID(objectID);
+        }
+
+        if (depth < 1.0f) {
+            glm::vec3 screenPos = glm::vec3(x, newy, depth);
+            glm::mat4 view = camera.getViewMatrix();
+            glm::mat4 projection = camera.getProjectionMatrix();
+            glm::vec4 viewPort = glm::vec4(0, 0, width, height);
+
+            glm::vec3 worldPos = glm::unProject(screenPos, view, projection, viewPort);
+
+            printf("unProject [%f,%f,%f]\n", worldPos.x, worldPos.y, worldPos.z);
+
+            scene->addTreeAt(worldPos);
+        }
+        else {
+            printf("Kliknuto na skybox, strom nepridan.\n");
         }
     }
 }

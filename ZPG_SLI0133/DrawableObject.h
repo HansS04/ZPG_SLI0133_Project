@@ -17,6 +17,7 @@ private:
 
     std::shared_ptr<Material> m_Material;
     bool isUnlit = false;
+    unsigned int m_ID = 0;
 
 public:
     DrawableObject(std::unique_ptr<Model> m, std::shared_ptr<ShaderProgram> s);
@@ -27,4 +28,7 @@ public:
 
     void setMaterial(std::shared_ptr<Material> material) { m_Material = material; }
     void setUnlit(bool unlit) { isUnlit = unlit; }
+
+    void setID(unsigned int id) { m_ID = id; }
+    unsigned int getID() const { return m_ID; }
 };

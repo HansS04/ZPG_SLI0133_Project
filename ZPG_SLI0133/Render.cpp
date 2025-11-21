@@ -17,6 +17,8 @@ void Render::run() {
 
     float lastTime = 0.0f;
 
+    glClearStencil(0);
+
     while (!glfwWindowShouldClose(window)) {
         float currentTime = (float)glfwGetTime();
         float deltaTime = currentTime - lastTime;
@@ -27,7 +29,7 @@ void Render::run() {
         }
 
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         Scene* scene = m_App.getActiveScene();
         int currentSceneIndex = m_App.getCurrentSceneIndex();

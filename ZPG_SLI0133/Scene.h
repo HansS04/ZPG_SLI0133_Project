@@ -14,6 +14,7 @@ class TransformationComposite;
 class DirLight;
 class PointLight;
 class SpotLight;
+class Material;
 
 class Scene
 {
@@ -42,6 +43,11 @@ public:
     void toggleFlashlight();
     void InitSkybox();
     void DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const;
+
+    void selectObjectByID(unsigned int id);
+    void addTreeAt(glm::vec3 position);
+    DrawableObject* getObjectByID(unsigned int id);
+
 private:
 
 
@@ -60,8 +66,10 @@ private:
     std::vector<glm::vec3> m_FireflyBasePositions;
     std::vector<DrawableObject*> m_FireflyBodyPtrs;
 
-    // --- PØIDÁNO PRO SKYBOX ---
     std::shared_ptr<ShaderProgram> skyboxShader;
     std::unique_ptr<DrawableObject> skyboxObject;
     GLuint cubemapTexture;
+
+    size_t m_ObjectCounter = 0;
+    std::shared_ptr<Material> m_TreeMaterial;
 };
