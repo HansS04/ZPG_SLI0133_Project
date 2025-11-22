@@ -20,4 +20,5 @@ public:
     TransformationComposite& rotate(float angle, const glm::vec3& axis);
     TransformationComposite& translate(const glm::vec3& translation);
     TransformationComposite& scale(const glm::vec3& scaleVector);
+    TransformationComposite& addMatrix20();
 };

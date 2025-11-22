@@ -29,3 +29,8 @@ public:
     ScaleTransformation(const glm::vec3& scaleVector);
     glm::mat4 apply(const glm::mat4& matrix) const override;
 };
+
+class Matrix20Transformation : public TransformationComponent {
+public:
+    glm::mat4 apply(const glm::mat4& matrix) const override;
+};

@@ -42,3 +42,9 @@ TransformationComposite& TransformationComposite::scale(const glm::vec3& scaleVe
     components.push_back(std::make_unique<ScaleTransformation>(scaleVector));
     return *this;
 }
+// Pøidejte do TransformationComposite.cpp
+TransformationComposite& TransformationComposite::addMatrix20() {
+    // Pøidáme naši speciální transformaci do seznamu
+    components.push_back(std::make_unique<Matrix20Transformation>());
+    return *this;
+}

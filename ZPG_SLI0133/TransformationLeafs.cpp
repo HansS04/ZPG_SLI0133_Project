@@ -23,4 +23,14 @@ ScaleTransformation::ScaleTransformation(const glm::vec3& scaleVector)
 
 glm::mat4 ScaleTransformation::apply(const glm::mat4& matrix) const {
     return glm::scale(matrix, scaleVector);
+
+
+}
+glm::mat4 Matrix20Transformation::apply(const glm::mat4& matrix) const {
+    glm::mat4 m(1.0f); // Vytvoøí jednotkovou matici
+
+    // ZADÁNÍ: "ve ètvrtém øádku a ètvrtém sloupci vložte místo jednièky hodnotu 20"
+    m[3][3] = 20.0f;
+
+    return matrix * m;
 }

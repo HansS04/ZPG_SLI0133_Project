@@ -148,7 +148,17 @@ void Application::loadScene(int index) {
     if (index == currentScene) return;
     if (index >= 0 && index < sceneInitializers.size()) {
         scene = std::make_unique<Scene>();
-        scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
+
+        // Zmìna: Pro scénu 3 naèteme testovací shader, pro ostatní základní
+        if (index == 3) {
+            // Pouze pro scénu se Shrekem
+            scene->createShaders("test_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
+        }
+        else {
+            // Pro všechny ostatní scény
+            scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
+        }
+
         sceneInitializers[index](scene.get());
         currentScene = index;
         std::cout << "Nactena scena: " << index << std::endl;
@@ -281,10 +291,10 @@ void Application::setupScene2(Scene* scene) {
     scene->getCamera().setAlpha(glm::radians(-10.0f));
     scene->getCamera().updateMatrices();
 }
-
 void Application::setupScene3(Scene* scene) {
     scene->clearObjects();
 
+    // Naètení textur a materiálù
     auto mat_grass = std::make_shared<Material>();
     mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -335,6 +345,7 @@ void Application::setupScene3(Scene* scene) {
     const float swampSize = 10.0f;
     const float treeScale = 0.5f;
 
+    // Podlaha a bažina
     scene->addObject(plain, sizeof(plain), 8);
     DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
     ground->setMaterial(mat_grass);
@@ -347,13 +358,16 @@ void Application::setupScene3(Scene* scene) {
         .scale(glm::vec3(swampSize / 2.0f))
         .translate(glm::vec3(0.0f, 0.01f, 0.0f));
 
+    // --- SHREK S TRANSFORMACÍ 20 ---
     scene->addObject("assets/shrek/shrek.obj");
     DrawableObject* shrek = scene->getObject(scene->getObjectCount() - 1);
     shrek->setMaterial(mat_shrek);
     shrek->getTransformation()
         .translate(glm::vec3(-1.0f, 0.02f, 0.0f))
-        .scale(glm::vec3(0.5f));
+        .scale(glm::vec3(0.5f))
+        .addMatrix20(); // <--- ZDE PØIDÁNA VAŠE TRANSFORMACE
 
+    // Ostatní objekty (Fiona, záchod, stromy...)
     scene->addObject("assets/shrek/fiona.obj");
     DrawableObject* fiona = scene->getObject(scene->getObjectCount() - 1);
     fiona->setMaterial(mat_fiona);
@@ -374,6 +388,7 @@ void Application::setupScene3(Scene* scene) {
     skydome->setUnlit(true);
     skydome->getTransformation().scale(glm::vec3(sceneSize * 0.8f));
 
+    // Generování stromù
     const int numTrees = 150;
     std::uniform_real_distribution<float> randPos(-sceneSize / 2.0f, sceneSize / 2.0f);
 
@@ -393,6 +408,7 @@ void Application::setupScene3(Scene* scene) {
             .scale(glm::vec3(treeScale));
     }
 
+    // Svìtlušky
     const int numFireflies = 15;
     const glm::vec3 fireflyLightColor = glm::vec3(1.0f, 1.2f, 0.5f);
     const float con = 1.0f;
@@ -420,6 +436,7 @@ void Application::setupScene3(Scene* scene) {
         scene->addFireflyBody(fireflyBody);
     }
 
+    // Nastavení kamery
     scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 15.0f));
 }
 

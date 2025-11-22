@@ -166,6 +166,7 @@ glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     <None Include="basic_vertexShader.vert" />
     <None Include="skybox.frag" />
     <None Include="skybox.vert" />
+    <None Include="test_vertexShader.vert" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />

@@ -9,24 +9,4 @@ D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8): warning 
       D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8):
       see declaration of 'Material'
   
-  DrawableObject.cpp
-  InputController.cpp
-  Model.cpp
-  Render.cpp
-  Scene.cpp
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\ShaderProgram.h(13,8): warning C4099: 'Material': type name first seen using 'class' now seen using 'struct'
-  (compiling source file 'Scene.cpp')
-      D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.h(17,7):
-      see declaration of 'Material'
-  
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8): warning C4099: 'Material': type name first seen using 'class' now seen using 'struct'
-  (compiling source file 'Scene.cpp')
-      D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8):
-      see declaration of 'Material'
-  
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(86,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(96,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(322,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-  main.cpp
-  Generating Code...
   ZPG_SLI0133.vcxproj -> D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\x64\Debug\ZPG_SLI0133.exe
