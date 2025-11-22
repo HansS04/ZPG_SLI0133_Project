@@ -23,7 +23,9 @@ extern bool direction;
 Scene::Scene()
     : m_FireflyTime(0.0f),
     m_AmbientLightColor(0.1f, 0.1f, 0.1f),
-    m_FlashlightOn(false)
+    m_FlashlightOn(false),
+    m_Score(0),
+    m_SpawnTimer(0.0f)
 {
     m_Flashlight = std::make_unique<SpotLight>(
         glm::vec3(0, 0, 0),
@@ -33,7 +35,6 @@ Scene::Scene()
         glm::cos(glm::radians(12.5f)),
         glm::cos(glm::radians(15.5f))
     );
-
 }
 
 void Scene::InitSkybox()
@@ -59,15 +60,12 @@ void Scene::InitSkybox()
 }
 
 void Scene::createShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
-
     Shader vs(GL_VERTEX_SHADER, vertexShaderFile.c_str());
     Shader fs(GL_FRAGMENT_SHADER, fragmentShaderFile.c_str());
 
     colorShaderProgram = std::make_shared<ShaderProgram>(vs, fs);
 
-
     int width = 1024, height = 768;
-
     camera = std::make_unique<Camera>(glm::vec3(0.0f, 1.0f, 3.0f));
 
     if (height > 0) {
@@ -98,6 +96,18 @@ void Scene::addObject(const char* modelName) {
     objects.push_back(std::move(obj));
 }
 
+DrawableObject* Scene::addGameObject(const char* modelName) {
+    std::unique_ptr<Model> m = std::make_unique<Model>(modelName);
+    std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
+
+    m_ObjectCounter++;
+    obj->setID(m_ObjectCounter);
+
+    DrawableObject* ptr = obj.get();
+    objects.push_back(std::move(obj));
+    return ptr;
+}
+
 void Scene::clearObjects() {
     objects.clear();
     m_Lights.clear();
@@ -105,6 +115,9 @@ void Scene::clearObjects() {
     m_FireflyPtrs.clear();
     m_FireflyBasePositions.clear();
     m_FireflyBodyPtrs.clear();
+
+    m_GameTargets.clear();
+    m_Score = 0;
 }
 
 void Scene::DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const
@@ -227,6 +240,147 @@ void Scene::update(float deltaTime, int currentSceneIndex) {
                 m_FireflyBodyPtrs[i]->getTransformation().scale(glm::vec3(0.05f));
             }
         }
+        updateGame(deltaTime);
+    }
+}
+
+void Scene::initGameMaterials() {
+    if (!m_MatShrek) {
+        m_MatShrek = std::make_shared<Material>();
+        m_MatShrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_MatShrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_MatShrek->shininess = 32.0f;
+        m_MatShrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
+    }
+    if (!m_MatFiona) {
+        m_MatFiona = std::make_shared<Material>();
+        m_MatFiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+        m_MatFiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_MatFiona->shininess = 32.0f;
+        m_MatFiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
+    }
+}
+
+void Scene::spawnGameTarget() {
+    float randomX = (std::rand() % 30 - 15) * 1.0f;
+    float randomZ = (std::rand() % 20 - 15) * 1.0f;
+
+    bool isShrek = (std::rand() % 2) == 0;
+
+    DrawableObject* newObj = nullptr;
+    if (isShrek) {
+        newObj = addGameObject("assets/shrek/shrek.obj");
+        newObj->setMaterial(m_MatShrek);
+    }
+    else {
+        newObj = addGameObject("assets/shrek/fiona.obj");
+        newObj->setMaterial(m_MatFiona);
+    }
+
+    glm::vec3 A = glm::vec3(randomX, -3.0f, randomZ);
+    glm::vec3 B = glm::vec3(randomX, 1.5f, randomZ);
+    glm::vec3 C = glm::vec3(randomX + (isShrek ? 2.0f : -2.0f), -3.0f, randomZ);
+
+    GameTarget target;
+    target.objectID = newObj->getID();
+    target.t = 0.0f;
+    target.speed = 0.8f + (std::rand() % 100) / 100.0f;
+    target.pointA = A;
+    target.pointB = B;
+    target.pointC = C;
+    target.pointsValue = isShrek ? 10 : -50;
+    target.isHit = false;
+    target.currentRotation = (float)(std::rand() % 360);
+
+    // Zvetseni modelu na 1.5f
+    newObj->getTransformation().reset();
+    newObj->getTransformation().translate(A);
+    newObj->getTransformation().scale(glm::vec3(1.5f));
+    newObj->getTransformation().rotate(target.currentRotation, glm::vec3(0, 1, 0));
+
+    m_GameTargets.push_back(target);
+}
+
+void Scene::updateGame(float deltaTime) {
+    m_SpawnTimer += deltaTime;
+    float spawnInterval = 1.2f;
+    if (m_SpawnTimer > spawnInterval) {
+        spawnGameTarget();
+        m_SpawnTimer = 0.0f;
+    }
+
+    for (auto it = m_GameTargets.begin(); it != m_GameTargets.end(); ) {
+        GameTarget& tgt = *it;
+
+        if (!tgt.isHit) {
+            tgt.t += tgt.speed * deltaTime;
+        }
+        else {
+            tgt.t += tgt.speed * deltaTime * 4.0f;
+        }
+
+        glm::vec3 currentPos;
+
+        if (tgt.t <= 1.0f) {
+            currentPos = tgt.pointA + tgt.t * (tgt.pointB - tgt.pointA);
+        }
+        else {
+            float t2 = tgt.t - 1.0f;
+            currentPos = tgt.pointB + t2 * (tgt.pointC - tgt.pointB);
+        }
+
+        tgt.currentRotation += 90.0f * deltaTime;
+
+        DrawableObject* obj = getObjectByID(tgt.objectID);
+        if (obj) {
+            // Reset transformace v kazdem snimku
+            obj->getTransformation().reset();
+            obj->getTransformation().translate(currentPos);
+
+            if (tgt.isHit) {
+                // Pri zasahu se zmensi
+                obj->getTransformation().scale(glm::vec3(0.5f));
+            }
+            else {
+                // Standardni velikost 1.5f
+                obj->getTransformation().scale(glm::vec3(1.5f));
+            }
+            obj->getTransformation().rotate(tgt.currentRotation, glm::vec3(0, 1, 0));
+        }
+
+        if (tgt.t >= 2.0f) {
+            for (auto oIt = objects.begin(); oIt != objects.end(); ++oIt) {
+                if ((*oIt)->getID() == tgt.objectID) {
+                    objects.erase(oIt);
+                    break;
+                }
+            }
+            it = m_GameTargets.erase(it);
+        }
+        else {
+            ++it;
+        }
+    }
+}
+
+void Scene::hitObject(unsigned int id) {
+    if (id == 0) return;
+
+    for (auto& tgt : m_GameTargets) {
+        if (tgt.objectID == id && !tgt.isHit) {
+            tgt.isHit = true;
+            m_Score += tgt.pointsValue;
+
+            std::cout << "=======================" << std::endl;
+            if (tgt.pointsValue > 0)
+                std::cout << "+ ZASAH SHREKA! +" << std::endl;
+            else
+                std::cout << "- FIONA! POZOR! -" << std::endl;
+
+            std::cout << "SKORE: [ " << m_Score << " ]" << std::endl;
+            std::cout << "=======================" << std::endl;
+            return;
+        }
     }
 }
 
@@ -282,7 +436,6 @@ void Scene::addFireflyBody(DrawableObject* body) {
 
 void Scene::toggleFlashlight() {
     m_FlashlightOn = !m_FlashlightOn;
-    std::cout << "Baterka " << (m_FlashlightOn ? "ZAPNUTA" : "VYPNUTA") << std::endl;
 }
 
 DrawableObject* Scene::getObjectByID(unsigned int id) {
@@ -297,11 +450,7 @@ DrawableObject* Scene::getObjectByID(unsigned int id) {
 void Scene::selectObjectByID(unsigned int id) {
     DrawableObject* selected = getObjectByID(id);
     if (selected) {
-        std::cout << "Vybran objekt s ID: " << id << std::endl;
-        //selected->getTransformation().scale(glm::vec3(0.8f));
-    }
-    else {
-        std::cout << "Kliknuto do prazdna (ID 0)." << std::endl;
+        // Debug vypis
     }
 }
 
@@ -315,7 +464,6 @@ void Scene::addTreeAt(glm::vec3 position) {
     }
 
     std::unique_ptr<Model> m = std::make_unique<Model>(tree, sizeof(tree), 6);
-
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
 
     m_ObjectCounter++;
@@ -327,6 +475,4 @@ void Scene::addTreeAt(glm::vec3 position) {
         .scale(glm::vec3(0.5f));
 
     objects.push_back(std::move(obj));
-
-    printf("Novy strom pridan na pozici: %f, %f, %f\n", position.x, position.y, position.z);
 }

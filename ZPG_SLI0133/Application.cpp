@@ -71,6 +71,8 @@ static void scroll_callback_adapter(GLFWwindow* w, double x, double y) {
 Application::Application(int width, int height, const std::string& title)
     : m_RandomEngine(static_cast<unsigned int>(std::time(nullptr)))
 {
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     if (!glfwInit())
         throw std::runtime_error("Failed to initialize GLFW");
 
@@ -108,7 +110,7 @@ Application::Application(int width, int height, const std::string& title)
     glViewport(0, 0, width, height);
 
     setupScenes();
-    loadScene(0);
+    loadScene(3);
 
     m_Render = std::make_unique<Render>(*this);
 }
@@ -145,17 +147,13 @@ void Application::setupScenes() {
 }
 
 void Application::loadScene(int index) {
-    if (index == currentScene) return;
     if (index >= 0 && index < sceneInitializers.size()) {
         scene = std::make_unique<Scene>();
 
-        // Zmìna: Pro scénu 3 naèteme testovací shader, pro ostatní základní
         if (index == 3) {
-            // Pouze pro scénu se Shrekem
-            scene->createShaders("test_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
+            scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
         }
         else {
-            // Pro všechny ostatní scény
             scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
         }
 
@@ -168,13 +166,11 @@ void Application::loadScene(int index) {
 void Application::setupScene0(Scene* s) {
     s->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
     s->addDirLight(glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(1.0f, 1.0f, 1.0f));
-
     auto triMaterial = std::make_shared<Material>();
     triMaterial->diffuse = glm::vec3(1.0f, 0.0f, 0.0f);
     triMaterial->ambient = glm::vec3(1.0f, 0.0f, 0.0f);
     triMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
     triMaterial->shininess = 32.0f;
-
     s->addObject(TEST_TRIANGLE, TEST_TRIANGLE_SIZE, 8);
     DrawableObject* obj = s->getFirstObject();
     if (obj) {
@@ -187,54 +183,44 @@ void Application::setupScene1(Scene* scene) {
     scene->clearObjects();
     scene->InitSkybox();
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-
     auto sphereMaterial = std::make_shared<Material>();
     sphereMaterial->diffuse = glm::vec3(0.9f, 0.9f, 0.9f);
     sphereMaterial->ambient = glm::vec3(0.9f, 0.9f, 0.9f);
     sphereMaterial->specular = glm::vec3(1.0f, 1.0f, 1.0f);
     sphereMaterial->shininess = 64.0f;
-
     auto lightBulbMaterial = std::make_shared<Material>();
     lightBulbMaterial->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-
     const float OBJECT_RADIUS = 1.0f;
     const float OBJECT_OFFSET = 1.5f;
     const float OBJECT_Y_POS = 0.0f;
     const glm::vec3 LIGHT_POS(0.0f, 3.0f, 0.0f);
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s1 = scene->getObject(scene->getObjectCount() - 1);
     s1->setMaterial(sphereMaterial);
     s1->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s1->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s2 = scene->getObject(scene->getObjectCount() - 1);
     s2->setMaterial(sphereMaterial);
     s2->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s2->getTransformation().translate(glm::vec3(OBJECT_OFFSET, OBJECT_Y_POS, OBJECT_OFFSET));
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s3 = scene->getObject(scene->getObjectCount() - 1);
     s3->setMaterial(sphereMaterial);
     s3->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s3->getTransformation().translate(glm::vec3(-OBJECT_OFFSET, OBJECT_Y_POS, -OBJECT_OFFSET));
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* s4 = scene->getObject(scene->getObjectCount() - 1);
     s4->setMaterial(sphereMaterial);
     s4->getTransformation().scale(glm::vec3(OBJECT_RADIUS));
     s4->getTransformation().translate(glm::vec3(OBJECT_OFFSET, OBJECT_Y_POS, -OBJECT_OFFSET));
-
     scene->addPointLight(LIGHT_POS, glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.09f, 0.032f);
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* lightBulb = scene->getObject(scene->getObjectCount() - 1);
     lightBulb->setMaterial(lightBulbMaterial);
     lightBulb->setUnlit(true);
     lightBulb->getTransformation().scale(glm::vec3(0.15f));
     lightBulb->getTransformation().translate(LIGHT_POS);
-
     scene->getCamera().setPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     scene->getCamera().setFi(glm::radians(0.0f));
     scene->getCamera().setAlpha(glm::radians(-90.0f));
@@ -251,136 +237,62 @@ float moonOrbitAngle = 0.0f;
 void Application::setupScene2(Scene* scene) {
     scene->clearObjects();
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-
     auto sunMaterial = std::make_shared<Material>();
     sunMaterial->diffuse = glm::vec3(1.0f, 1.0f, 0.6f);
-
     auto earthMaterial = std::make_shared<Material>();
     earthMaterial->diffuse = glm::vec3(0.0f, 0.0f, 0.8f);
     earthMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
     earthMaterial->shininess = 32.0f;
-
     auto moonMaterial = std::make_shared<Material>();
     moonMaterial->diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
     moonMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
     moonMaterial->shininess = 8.0f;
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* sun = scene->getObject(scene->getObjectCount() - 1);
     sun->setMaterial(sunMaterial);
     sun->setUnlit(true);
     sun->getTransformation().scale(glm::vec3(2.5f));
     sun->getTransformation().translate(glm::vec3(0.0f, 0.0f, 0.0f));
-
     scene->addPointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), 1.0f, 0.007f, 0.0002f);
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* earth = scene->getObject(scene->getObjectCount() - 1);
     earth->setMaterial(earthMaterial);
     earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
     earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
-
     scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
     DrawableObject* moon = scene->getObject(scene->getObjectCount() - 1);
     moon->setMaterial(moonMaterial);
     moon->getTransformation().scale(glm::vec3(SCALE_MOON));
     moon->getTransformation().translate(glm::vec3(MOON_EARTH_DISTANCE, 0.0f, 0.0f));
-
     scene->getCamera().setPosition(glm::vec3(EARTH_SUN_DISTANCE + 5.0f, 3.0f, 5.0f));
     scene->getCamera().setFi(glm::radians(-180.0f));
     scene->getCamera().setAlpha(glm::radians(-10.0f));
     scene->getCamera().updateMatrices();
 }
+
 void Application::setupScene3(Scene* scene) {
     scene->clearObjects();
+    scene->initGameMaterials();
 
-    // Naètení textur a materiálù
     auto mat_grass = std::make_shared<Material>();
     mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f);
     mat_grass->shininess = 16.0f;
     mat_grass->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/grass.png");
 
-    auto mat_swamp = std::make_shared<Material>();
-    mat_swamp->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_swamp->specular = glm::vec3(0.2f, 0.2f, 0.1f);
-    mat_swamp->shininess = 8.0f;
-    mat_swamp->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/mud.jpg");
-
-    auto mat_shrek = std::make_shared<Material>();
-    mat_shrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_shrek->shininess = 32.0f;
-    mat_shrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
-
-    auto mat_fiona = std::make_shared<Material>();
-    mat_fiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_fiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_fiona->shininess = 32.0f;
-    mat_fiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
-
-    auto mat_toilet = std::make_shared<Material>();
-    mat_toilet->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_toilet->specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    mat_toilet->shininess = 128.0f;
-    mat_toilet->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/toiled.jpg");
-
-    auto mat_tree = std::make_shared<Material>();
-    mat_tree->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
-    mat_tree->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
-    mat_tree->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_tree->shininess = 16.0f;
-
-    auto mat_firefly_body = std::make_shared<Material>();
-    mat_firefly_body->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-
     auto mat_skydome = std::make_shared<Material>();
     mat_skydome->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     mat_skydome->diffuseTextureID = TextureLoader::LoadTexture("assets/sky/skydome.png");
 
-    scene->setAmbientLight(glm::vec3(0.02f, 0.02f, 0.05f));
-    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.15f));
+    scene->setAmbientLight(glm::vec3(0.3f, 0.3f, 0.3f));
+    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.8f, 0.8f, 0.8f));
 
     const float sceneSize = 50.0f;
-    const float swampSize = 10.0f;
-    const float treeScale = 0.5f;
 
-    // Podlaha a bažina
     scene->addObject(plain, sizeof(plain), 8);
     DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
     ground->setMaterial(mat_grass);
     ground->getTransformation().scale(glm::vec3(sceneSize / 2.0f));
-
-    scene->addObject(plain, sizeof(plain), 8);
-    DrawableObject* swamp = scene->getObject(scene->getObjectCount() - 1);
-    swamp->setMaterial(mat_swamp);
-    swamp->getTransformation()
-        .scale(glm::vec3(swampSize / 2.0f))
-        .translate(glm::vec3(0.0f, 0.01f, 0.0f));
-
-    // --- SHREK S TRANSFORMACÍ 20 ---
-    scene->addObject("assets/shrek/shrek.obj");
-    DrawableObject* shrek = scene->getObject(scene->getObjectCount() - 1);
-    shrek->setMaterial(mat_shrek);
-    shrek->getTransformation()
-        .translate(glm::vec3(-1.0f, 0.02f, 0.0f))
-        .scale(glm::vec3(0.5f))
-        .addMatrix20(); // <--- ZDE PØIDÁNA VAŠE TRANSFORMACE
-
-    // Ostatní objekty (Fiona, záchod, stromy...)
-    scene->addObject("assets/shrek/fiona.obj");
-    DrawableObject* fiona = scene->getObject(scene->getObjectCount() - 1);
-    fiona->setMaterial(mat_fiona);
-    fiona->getTransformation()
-        .translate(glm::vec3(1.0f, 0.02f, 0.0f))
-        .scale(glm::vec3(0.5f));
-
-    scene->addObject("assets/shrek/toiled.obj");
-    DrawableObject* toilet = scene->getObject(scene->getObjectCount() - 1);
-    toilet->setMaterial(mat_toilet);
-    toilet->getTransformation()
-        .translate(glm::vec3(0.0f, 0.02f, 0.0f))
-        .scale(glm::vec3(0.5f));
 
     scene->addObject("assets/sky/skydome.obj");
     DrawableObject* skydome = scene->getObject(scene->getObjectCount() - 1);
@@ -388,103 +300,23 @@ void Application::setupScene3(Scene* scene) {
     skydome->setUnlit(true);
     skydome->getTransformation().scale(glm::vec3(sceneSize * 0.8f));
 
-    // Generování stromù
-    const int numTrees = 150;
-    std::uniform_real_distribution<float> randPos(-sceneSize / 2.0f, sceneSize / 2.0f);
+    std::cout << "================================" << std::endl;
+    std::cout << "   HRA WHAC-A-MOLE (3D) START   " << std::endl;
+    std::cout << "================================" << std::endl;
+    std::cout << "CIL: Klikni na SHREKA (+10 bodu)" << std::endl;
+    std::cout << "POZOR: Neklikej na FIONU (-50 bodu)" << std::endl;
 
-    for (int i = 0; i < numTrees; ++i) {
-        float x = randPos(m_RandomEngine);
-        float z = randPos(m_RandomEngine);
-
-        if (std::abs(x) < (swampSize / 2.0f + 1.0f) && std::abs(z) < (swampSize / 2.0f + 1.0f)) {
-            continue;
-        }
-
-        scene->addObject(tree, TREE_DATA_SIZE, 6);
-        DrawableObject* treeObj = scene->getObject(scene->getObjectCount() - 1);
-        treeObj->setMaterial(mat_tree);
-        treeObj->getTransformation()
-            .translate(glm::vec3(x, 0.0f, z))
-            .scale(glm::vec3(treeScale));
-    }
-
-    // Svìtlušky
-    const int numFireflies = 15;
-    const glm::vec3 fireflyLightColor = glm::vec3(1.0f, 1.2f, 0.5f);
-    const float con = 1.0f;
-    const float lin = 1.0f;
-    const float quad = 2.0f;
-    std::uniform_real_distribution<float> randEdge(-swampSize / 2.0f, swampSize / 2.0f);
-    std::uniform_real_distribution<float> randY_dist(0.5f, 2.0f);
-    std::uniform_int_distribution<int> randSide(0, 3);
-
-    for (int i = 0; i < numFireflies; ++i) {
-        float x = 0.0f, z = 0.0f;
-        int side = randSide(m_RandomEngine);
-        if (side == 0) { x = -swampSize / 2.0f; z = randEdge(m_RandomEngine); }
-        else if (side == 1) { x = swampSize / 2.0f; z = randEdge(m_RandomEngine); }
-        else if (side == 2) { z = -swampSize / 2.0f; x = randEdge(m_RandomEngine); }
-        else { z = swampSize / 2.0f; x = randEdge(m_RandomEngine); }
-        float y = randY_dist(m_RandomEngine);
-
-        scene->addFirefly(glm::vec3(x, y, z), fireflyLightColor, con, lin, quad);
-
-        scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
-        DrawableObject* fireflyBody = scene->getObject(scene->getObjectCount() - 1);
-        fireflyBody->setMaterial(mat_firefly_body);
-        fireflyBody->setUnlit(true);
-        scene->addFireflyBody(fireflyBody);
-    }
-
-    // Nastavení kamery
-    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 15.0f));
+    scene->getCamera().setPosition(glm::vec3(0.0f, 12.0f, 25.0f));
+    scene->getCamera().setFi(glm::radians(-90.0f));
+    scene->getCamera().setAlpha(glm::radians(-25.0f));
+    scene->getCamera().updateMatrices();
 }
 
 void Application::setupScene4(Scene* s) {
     s->clearObjects();
     s->InitSkybox();
-
     s->setAmbientLight(glm::vec3(0.2f, 0.2f, 0.2f));
     s->addDirLight(glm::vec3(-0.5f, -1.0f, -0.5f), glm::vec3(0.8f, 0.8f, 0.8f));
-
-    auto mat_shrek = std::make_shared<Material>();
-    mat_shrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_shrek->shininess = 32.0f;
-    mat_shrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
-
-    auto mat_fiona = std::make_shared<Material>();
-    mat_fiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_fiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    mat_fiona->shininess = 32.0f;
-    mat_fiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
-
-    auto mat_toilet = std::make_shared<Material>();
-    mat_toilet->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-    mat_toilet->specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    mat_toilet->shininess = 128.0f;
-    mat_toilet->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/toiled.jpg");
-
-    s->addObject("assets/shrek/shrek.obj");
-    DrawableObject* shrek = s->getObject(s->getObjectCount() - 1);
-    shrek->setMaterial(mat_shrek);
-    shrek->getTransformation()
-        .translate(glm::vec3(-1.0f, 0.0f, -2.0f))
-        .scale(glm::vec3(0.5f));
-
-    s->addObject("assets/shrek/fiona.obj");
-    DrawableObject* fiona = s->getObject(s->getObjectCount() - 1);
-    fiona->setMaterial(mat_fiona);
-    fiona->getTransformation()
-        .translate(glm::vec3(1.0f, 0.0f, -2.0f))
-        .scale(glm::vec3(0.5f));
-
-    s->addObject("assets/shrek/toiled.obj");
-    DrawableObject* toilet = s->getObject(s->getObjectCount() - 1);
-    toilet->setMaterial(mat_toilet);
-    toilet->getTransformation()
-        .translate(glm::vec3(0.0f, 0.0f, -3.0f))
-        .scale(glm::vec3(0.5f));
 
     s->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
 }

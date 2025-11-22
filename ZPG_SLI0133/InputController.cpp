@@ -17,23 +17,26 @@ void InputController::processPollingInput(float deltaTime) {
     Scene* scene = m_App.getActiveScene();
     if (!scene) return;
 
-    const float cameraSpeed = 5.0f * deltaTime;
-    if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS)
-        processCameraKeyboard(CameraMovement::FORWARD, cameraSpeed);
-    if (glfwGetKey(m_Window, GLFW_KEY_S) == GLFW_PRESS)
-        processCameraKeyboard(CameraMovement::BACKWARD, cameraSpeed);
-    if (glfwGetKey(m_Window, GLFW_KEY_A) == GLFW_PRESS)
-        processCameraKeyboard(CameraMovement::LEFT, cameraSpeed);
-    if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS)
-        processCameraKeyboard(CameraMovement::RIGHT, cameraSpeed);
+    int currentSceneIdx = m_App.getCurrentSceneIndex();
+
+    // Ve hre (scena 3) kamera nejezdi WASD
+    if (currentSceneIdx != 3) {
+        const float cameraSpeed = 5.0f * deltaTime;
+        if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS)
+            processCameraKeyboard(CameraMovement::FORWARD, cameraSpeed);
+        if (glfwGetKey(m_Window, GLFW_KEY_S) == GLFW_PRESS)
+            processCameraKeyboard(CameraMovement::BACKWARD, cameraSpeed);
+        if (glfwGetKey(m_Window, GLFW_KEY_A) == GLFW_PRESS)
+            processCameraKeyboard(CameraMovement::LEFT, cameraSpeed);
+        if (glfwGetKey(m_Window, GLFW_KEY_D) == GLFW_PRESS)
+            processCameraKeyboard(CameraMovement::RIGHT, cameraSpeed);
+    }
 
     if (glfwGetKey(m_Window, GLFW_KEY_1) == GLFW_PRESS) m_App.loadScene(1);
     if (glfwGetKey(m_Window, GLFW_KEY_2) == GLFW_PRESS) m_App.loadScene(2);
     if (glfwGetKey(m_Window, GLFW_KEY_3) == GLFW_PRESS) m_App.loadScene(3);
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
     if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4);
-    if (glfwGetKey(m_Window, GLFW_KEY_5) == GLFW_PRESS) m_App.loadScene(5);
-    if (glfwGetKey(m_Window, GLFW_KEY_6) == GLFW_PRESS) m_App.loadScene(6);
 }
 
 void InputController::onKey(int key, int scancode, int action, int mods) {
@@ -74,32 +77,30 @@ void InputController::onMouseButton(int button, int action, int mods) {
         GLint y = (GLint)ypos;
         int newy = height - y;
 
-        GLfloat depth;
         GLuint index;
-
-        glReadPixels(x, newy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
         glReadPixels(x, newy, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
 
         GLuint objectID = index & 0xFF;
 
-        if (objectID > 0) {
-            scene->selectObjectByID(objectID);
-        }
-
-        if (depth < 1.0f) {
-            glm::vec3 screenPos = glm::vec3(x, newy, depth);
-            glm::mat4 view = camera.getViewMatrix();
-            glm::mat4 projection = camera.getProjectionMatrix();
-            glm::vec4 viewPort = glm::vec4(0, 0, width, height);
-
-            glm::vec3 worldPos = glm::unProject(screenPos, view, projection, viewPort);
-
-            printf("unProject [%f,%f,%f]\n", worldPos.x, worldPos.y, worldPos.z);
-
-            scene->addTreeAt(worldPos);
+        // Pokud je aktivni herni scena, resime zasahy
+        if (m_App.getCurrentSceneIndex() == 3) {
+            if (objectID > 0) {
+                scene->hitObject(objectID);
+            }
         }
         else {
-            printf("Kliknuto na skybox, strom nepridan.\n");
+            // Jinak sazime stromy
+            GLfloat depth;
+            glReadPixels(x, newy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+            if (depth < 1.0f) {
+                glm::vec3 screenPos = glm::vec3(x, newy, depth);
+                glm::mat4 view = camera.getViewMatrix();
+                glm::mat4 projection = camera.getProjectionMatrix();
+                glm::vec4 viewPort = glm::vec4(0, 0, width, height);
+                glm::vec3 worldPos = glm::unProject(screenPos, view, projection, viewPort);
+                scene->addTreeAt(worldPos);
+            }
         }
     }
 }

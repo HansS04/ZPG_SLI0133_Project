@@ -16,6 +16,19 @@ class PointLight;
 class SpotLight;
 class Material;
 
+// Struktura pro herni cil (Shrek/Fiona)
+struct GameTarget {
+    unsigned int objectID;
+    float t;                // Parametr pohybu (0 az 2)
+    float speed;            // Rychlost
+    glm::vec3 pointA;       // Start (dole)
+    glm::vec3 pointB;       // Vrchol (nahore)
+    glm::vec3 pointC;       // Konec (dole)
+    int pointsValue;        // Hodnota bodu
+    bool isHit;             // Zasah
+    float currentRotation;  // Aktualni rotace
+};
+
 class Scene
 {
 public:
@@ -25,6 +38,10 @@ public:
     void createShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile);
     void addObject(const float* data, size_t size, int stride);
     void addObject(const char* modelName);
+
+    // Pridani herniho objektu (vraci pointer pro manipulaci)
+    DrawableObject* addGameObject(const char* modelName);
+
     void clearObjects();
     void render() const;
     void update(float deltaTime, int currentSceneIndex);
@@ -48,9 +65,13 @@ public:
     void addTreeAt(glm::vec3 position);
     DrawableObject* getObjectByID(unsigned int id);
 
+    // --- HERNI METODY ---
+    void initGameMaterials();
+    void spawnGameTarget();
+    void updateGame(float deltaTime);
+    void hitObject(unsigned int id);
+
 private:
-
-
     std::vector<std::unique_ptr<DrawableObject>> objects;
     std::shared_ptr<ShaderProgram> colorShaderProgram;
     std::unique_ptr<Camera> camera;
@@ -72,4 +93,12 @@ private:
 
     size_t m_ObjectCounter = 0;
     std::shared_ptr<Material> m_TreeMaterial;
+
+    // Herni promenne
+    std::vector<GameTarget> m_GameTargets;
+    float m_SpawnTimer = 0.0f;
+    int m_Score = 0;
+
+    std::shared_ptr<Material> m_MatShrek;
+    std::shared_ptr<Material> m_MatFiona;
 };
