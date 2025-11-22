@@ -19,8 +19,8 @@ void InputController::processPollingInput(float deltaTime) {
 
     int currentSceneIdx = m_App.getCurrentSceneIndex();
 
-    // Ve hre (scena 3) kamera nejezdi WASD
-    if (currentSceneIdx != 3) {
+    // Kamera se nehybe WASD jenom ve scene 4 (Hra)
+    if (currentSceneIdx != 4) {
         const float cameraSpeed = 5.0f * deltaTime;
         if (glfwGetKey(m_Window, GLFW_KEY_W) == GLFW_PRESS)
             processCameraKeyboard(CameraMovement::FORWARD, cameraSpeed);
@@ -35,8 +35,8 @@ void InputController::processPollingInput(float deltaTime) {
     if (glfwGetKey(m_Window, GLFW_KEY_1) == GLFW_PRESS) m_App.loadScene(1);
     if (glfwGetKey(m_Window, GLFW_KEY_2) == GLFW_PRESS) m_App.loadScene(2);
     if (glfwGetKey(m_Window, GLFW_KEY_3) == GLFW_PRESS) m_App.loadScene(3);
+    if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4); // Hra
     if (glfwGetKey(m_Window, GLFW_KEY_0) == GLFW_PRESS) m_App.loadScene(0);
-    if (glfwGetKey(m_Window, GLFW_KEY_4) == GLFW_PRESS) m_App.loadScene(4);
 }
 
 void InputController::onKey(int key, int scancode, int action, int mods) {
@@ -82,14 +82,14 @@ void InputController::onMouseButton(int button, int action, int mods) {
 
         GLuint objectID = index & 0xFF;
 
-        // Pokud je aktivni herni scena, resime zasahy
-        if (m_App.getCurrentSceneIndex() == 3) {
+        // ZASAHY JEN VE SCENE 4
+        if (m_App.getCurrentSceneIndex() == 4) {
             if (objectID > 0) {
                 scene->hitObject(objectID);
             }
         }
         else {
-            // Jinak sazime stromy
+            // Jine sceny (napø. sázení stromù)
             GLfloat depth;
             glReadPixels(x, newy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 
@@ -99,7 +99,7 @@ void InputController::onMouseButton(int button, int action, int mods) {
                 glm::mat4 projection = camera.getProjectionMatrix();
                 glm::vec4 viewPort = glm::vec4(0, 0, width, height);
                 glm::vec3 worldPos = glm::unProject(screenPos, view, projection, viewPort);
-                scene->addTreeAt(worldPos);
+                scene->addTreeAt(worldPos, 0.5f);
             }
         }
     }

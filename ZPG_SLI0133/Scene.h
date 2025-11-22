@@ -62,14 +62,17 @@ public:
     void DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const;
 
     void selectObjectByID(unsigned int id);
-    void addTreeAt(glm::vec3 position);
+    void addTreeAt(glm::vec3 position, float scale);
+    void addBushAt(glm::vec3 position, float scale);
     DrawableObject* getObjectByID(unsigned int id);
 
     // --- HERNI METODY ---
-    void initGameMaterials();
-    void spawnGameTarget();
-    void updateGame(float deltaTime);
-    void hitObject(unsigned int id);
+    void setPlayerName(std::string name);
+    void initGameMaterials(); // Pripravi materialy
+    void initForest();        // Vygeneruje staticky les
+    void spawnGameTarget();   // Vytvori krtka
+    void updateGame(float deltaTime); // Logika hry
+    void hitObject(unsigned int id);  // Zasah
 
 private:
     std::vector<std::unique_ptr<DrawableObject>> objects;
@@ -82,6 +85,7 @@ private:
     bool m_FlashlightOn;
     glm::vec3 m_AmbientLightColor;
 
+    // Svetlusky
     float m_FireflyTime;
     std::vector<PointLight*> m_FireflyPtrs;
     std::vector<glm::vec3> m_FireflyBasePositions;
@@ -92,13 +96,18 @@ private:
     GLuint cubemapTexture;
 
     size_t m_ObjectCounter = 0;
+
+    // Materialy (cache)
     std::shared_ptr<Material> m_TreeMaterial;
+    std::shared_ptr<Material> m_BushMaterial;
+    std::shared_ptr<Material> m_MatShrek;
+    std::shared_ptr<Material> m_MatFiona;
 
     // Herni promenne
     std::vector<GameTarget> m_GameTargets;
     float m_SpawnTimer = 0.0f;
     int m_Score = 0;
-
-    std::shared_ptr<Material> m_MatShrek;
-    std::shared_ptr<Material> m_MatFiona;
+    std::string m_PlayerName;
+    bool m_GameRunning = false;
+    bool m_GameFinished = false;
 };

@@ -110,7 +110,7 @@ Application::Application(int width, int height, const std::string& title)
     glViewport(0, 0, width, height);
 
     setupScenes();
-    loadScene(3);
+    loadScene(4);
 
     m_Render = std::make_unique<Render>(*this);
 }
@@ -150,7 +150,7 @@ void Application::loadScene(int index) {
     if (index >= 0 && index < sceneInitializers.size()) {
         scene = std::make_unique<Scene>();
 
-        if (index == 3) {
+        if (index == 4) {
             scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
         }
         else {
@@ -271,8 +271,25 @@ void Application::setupScene2(Scene* scene) {
 }
 
 void Application::setupScene3(Scene* scene) {
+    // Puvodni scena 3 (ted prazdna nebo puvodni obsah)
+    scene->clearObjects();
+    scene->InitSkybox();
+    scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
+    scene->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
+}
+
+// --- HERNI SCENA 4 ---
+void Application::setupScene4(Scene* scene) {
     scene->clearObjects();
     scene->initGameMaterials();
+
+    // Zadost o nick
+    std::string nick;
+    std::cout << "\n========================================" << std::endl;
+    std::cout << "Zadejte svuj NICK pro start hry: ";
+    std::cin >> nick;
+    scene->setPlayerName(nick);
+    std::cout << "========================================\n" << std::endl;
 
     auto mat_grass = std::make_shared<Material>();
     mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -284,39 +301,51 @@ void Application::setupScene3(Scene* scene) {
     mat_skydome->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
     mat_skydome->diffuseTextureID = TextureLoader::LoadTexture("assets/sky/skydome.png");
 
-    scene->setAmbientLight(glm::vec3(0.3f, 0.3f, 0.3f));
-    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.8f, 0.8f, 0.8f));
+    auto mat_firefly = std::make_shared<Material>();
+    mat_firefly->diffuse = glm::vec3(1.0f, 1.0f, 0.5f); // Zluta
 
-    const float sceneSize = 50.0f;
+    scene->setAmbientLight(glm::vec3(0.15f, 0.15f, 0.25f)); // Nocni nadech
+    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.4f, 0.4f, 0.5f));
 
+    const float sceneSize = 80.0f; // VETSI PLOCHA
+
+    // Podlaha
     scene->addObject(plain, sizeof(plain), 8);
     DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
     ground->setMaterial(mat_grass);
-    ground->getTransformation().scale(glm::vec3(sceneSize / 2.0f));
+    ground->getTransformation().scale(glm::vec3(sceneSize));
 
+    // Obloha
     scene->addObject("assets/sky/skydome.obj");
     DrawableObject* skydome = scene->getObject(scene->getObjectCount() - 1);
     skydome->setMaterial(mat_skydome);
     skydome->setUnlit(true);
-    skydome->getTransformation().scale(glm::vec3(sceneSize * 0.8f));
+    skydome->getTransformation().scale(glm::vec3(sceneSize * 1.2f));
 
-    std::cout << "================================" << std::endl;
-    std::cout << "   HRA WHAC-A-MOLE (3D) START   " << std::endl;
-    std::cout << "================================" << std::endl;
-    std::cout << "CIL: Klikni na SHREKA (+10 bodu)" << std::endl;
-    std::cout << "POZOR: Neklikej na FIONU (-50 bodu)" << std::endl;
+    // Generovani statickeho lesa (stromy a kere)
+    scene->initForest();
 
-    scene->getCamera().setPosition(glm::vec3(0.0f, 12.0f, 25.0f));
+    // Pridani svetlusek (Point Lights + male modely)
+    const int numFireflies = 10;
+    for (int i = 0; i < numFireflies; ++i) {
+        float x = (std::rand() % 40) - 20.0f;
+        float z = (std::rand() % 40) - 20.0f;
+        float y = 2.0f + (std::rand() % 20) / 10.0f;
+
+        scene->addFirefly(glm::vec3(x, y, z), glm::vec3(1.0f, 0.8f, 0.2f), 1.0f, 0.7f, 1.8f);
+
+        // Model pro svetlusku (mala sfera)
+        scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
+        DrawableObject* ffBody = scene->getObject(scene->getObjectCount() - 1);
+        ffBody->setMaterial(mat_firefly);
+        ffBody->setUnlit(true);
+        ffBody->getTransformation().translate(glm::vec3(x, y, z)).scale(glm::vec3(0.1f));
+
+        scene->addFireflyBody(ffBody);
+    }
+
+    scene->getCamera().setPosition(glm::vec3(0.0f, 20.0f, 40.0f));
     scene->getCamera().setFi(glm::radians(-90.0f));
-    scene->getCamera().setAlpha(glm::radians(-25.0f));
+    scene->getCamera().setAlpha(glm::radians(-30.0f));
     scene->getCamera().updateMatrices();
-}
-
-void Application::setupScene4(Scene* s) {
-    s->clearObjects();
-    s->InitSkybox();
-    s->setAmbientLight(glm::vec3(0.2f, 0.2f, 0.2f));
-    s->addDirLight(glm::vec3(-0.5f, -1.0f, -0.5f), glm::vec3(0.8f, 0.8f, 0.8f));
-
-    s->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
 }
