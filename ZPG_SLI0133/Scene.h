@@ -18,14 +18,14 @@ class Material;
 
 struct GameTarget {
     unsigned int objectID;
-    float t;                // Parame. of movement (0 - 2)
-    float speed;            // Speed
-    glm::vec3 pointA;       // Start
-    glm::vec3 pointB;       // Up
-    glm::vec3 pointC;       // End (down)
-    int pointsValue;        // Value of point
-    bool isHit;             // Hit detect
-	float currentRotation;  // Actual rotation
+    float t;
+    float speed;
+    glm::vec3 pointA;
+    glm::vec3 pointB;
+    glm::vec3 pointC;
+    int pointsValue;
+    bool isHit;
+    float currentRotation;
 };
 
 class Scene
@@ -64,13 +64,16 @@ public:
     void addBushAt(glm::vec3 position, float scale = 0.5f);
     DrawableObject* getObjectByID(unsigned int id);
 
+    // --- Solar System Methods ---
+    void initSolarSystem();
+
     // --- Game methods ---
     void setPlayerName(std::string name);
-	void initGameMaterials(); // Init. materils for game targets
-	void initForest();        // Generate static forest
-	void spawnGameTarget();   // Create new target (Shrek and Fiona)
-    void updateGame(float deltaTime); // Game Logic
-    void hitObject(unsigned int id);  // Zasah
+    void initGameMaterials();
+    void initForest();
+    void spawnGameTarget();
+    void updateGame(float deltaTime);
+    void hitObject(unsigned int id);
 
 private:
     std::vector<std::unique_ptr<DrawableObject>> objects;
@@ -99,7 +102,24 @@ private:
     std::shared_ptr<Material> m_MatShrek;
     std::shared_ptr<Material> m_MatFiona;
 
-	// Game variables
+    // --- Solar System Pointers ---
+    DrawableObject* m_Sun = nullptr;
+    DrawableObject* m_Mercury = nullptr;
+    DrawableObject* m_Venus = nullptr;
+    DrawableObject* m_Earth = nullptr;
+    DrawableObject* m_Moon = nullptr;
+    DrawableObject* m_Mars = nullptr;
+    DrawableObject* m_Jupiter = nullptr;
+    DrawableObject* m_Saturn = nullptr;
+    DrawableObject* m_Uranus = nullptr;
+    DrawableObject* m_Neptune = nullptr;
+
+    // Animation angles
+    float m_OrbitAngles[8] = { 0.0f }; // One for each planet
+    float m_MoonOrbitAngle = 0.0f;
+    float m_SelfRotationAngle = 0.0f;
+
+    // Game variables
     std::vector<GameTarget> m_GameTargets;
     float m_SpawnTimer = 0.0f;
     int m_Score = 0;

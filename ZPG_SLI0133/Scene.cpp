@@ -9,6 +9,7 @@
 #include "TextureLoader.h" 
 #include "tree.h"
 #include "bushes.h"
+// #include "sphere.h" // Uz nepotrebujeme, pouzivame planet.obj
 #include "Material.h" 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
@@ -16,6 +17,7 @@
 #include <stdexcept>
 #include <algorithm> 
 #include <glm/gtc/constants.hpp>
+#include <vector>
 
 extern float rotationSpeed;
 extern float rotationAngle;
@@ -23,7 +25,7 @@ extern bool direction;
 
 Scene::Scene()
     : m_FireflyTime(0.0f),
-    m_AmbientLightColor(0.1f, 0.1f, 0.1f),
+    m_AmbientLightColor(0.05f, 0.05f, 0.05f),
     m_FlashlightOn(false),
     m_Score(0),
     m_SpawnTimer(0.0f),
@@ -63,6 +65,7 @@ void Scene::InitSkybox()
     cubemapTexture = TextureLoader::loadCubemap(faces);
 }
 
+
 void Scene::createShaders(const std::string& vertexShaderFile, const std::string& fragmentShaderFile) {
     Shader vs(GL_VERTEX_SHADER, vertexShaderFile.c_str());
     Shader fs(GL_FRAGMENT_SHADER, fragmentShaderFile.c_str());
@@ -70,14 +73,77 @@ void Scene::createShaders(const std::string& vertexShaderFile, const std::string
     colorShaderProgram = std::make_shared<ShaderProgram>(vs, fs);
 
     int width = 1024, height = 768;
-    camera = std::make_unique<Camera>(glm::vec3(0.0f, 1.0f, 3.0f));
+    camera = std::make_unique<Camera>(glm::vec3(0.0f, 30.0f, 40.0f));
 
     if (height > 0) {
         camera->setAspectRatio((float)width, (float)height);
     }
 
+    camera->setFi(glm::radians(-90.0f));
+    camera->setAlpha(glm::radians(-37.0f));
+
     camera->attach(colorShaderProgram.get());
     camera->updateMatrices();
+}
+
+std::shared_ptr<Material> createTexturedMaterial(const std::string& texturePath, float shininess = 32.0f) {
+    auto mat = std::make_shared<Material>();
+    mat->diffuse = glm::vec3(1.0f);
+    mat->specular = glm::vec3(0.1f);
+    mat->shininess = shininess;
+    mat->diffuseTextureID = TextureLoader::LoadTexture(texturePath.c_str());
+    return mat;
+}
+
+void Scene::initSolarSystem() {
+    // --- POUZIVAME MODEL assets/planet.obj ---
+    const char* planetModelPath = "assets/planet.obj";
+
+    // 1. Slunce
+    auto sunMat = createTexturedMaterial("assets/texture/2k_sun.jpg");
+    sunMat->ambient = glm::vec3(1.0f); // Slunce zari
+
+    m_Sun = addGameObject(planetModelPath);
+    m_Sun->setMaterial(sunMat);
+    m_Sun->setUnlit(true); // Neprijima stiny
+
+    addPointLight(glm::vec3(0.0f), glm::vec3(1.5f, 1.5f, 1.4f), 1.0f, 0.02f, 0.005f);
+
+    // 2. Merkur
+    m_Mercury = addGameObject(planetModelPath);
+    m_Mercury->setMaterial(createTexturedMaterial("assets/texture/2k_mercury.jpg"));
+
+    // 3. Venuse
+    m_Venus = addGameObject(planetModelPath);
+    m_Venus->setMaterial(createTexturedMaterial("assets/texture/2k_venus_surface.jpg"));
+
+    // 4. Zeme
+    m_Earth = addGameObject(planetModelPath);
+    m_Earth->setMaterial(createTexturedMaterial("assets/texture/2k_earth_daymap.jpg"));
+
+    // 5. Mesic
+    m_Moon = addGameObject(planetModelPath);
+    m_Moon->setMaterial(createTexturedMaterial("assets/texture/moon.jpeg"));
+
+    // 6. Mars
+    m_Mars = addGameObject(planetModelPath);
+    m_Mars->setMaterial(createTexturedMaterial("assets/texture/2k_mars.jpg"));
+
+    // 7. Jupiter
+    m_Jupiter = addGameObject(planetModelPath);
+    m_Jupiter->setMaterial(createTexturedMaterial("assets/texture/2k_jupiter.jpg"));
+
+    // 8. Saturn
+    m_Saturn = addGameObject(planetModelPath);
+    m_Saturn->setMaterial(createTexturedMaterial("assets/texture/2k_saturn.jpg"));
+
+    // 9. Uran
+    m_Uranus = addGameObject(planetModelPath);
+    m_Uranus->setMaterial(createTexturedMaterial("assets/texture/2k_uranus.jpg"));
+
+    // 10. Neptun
+    m_Neptune = addGameObject(planetModelPath);
+    m_Neptune->setMaterial(createTexturedMaterial("assets/texture/2k_neptune.jpg"));
 }
 
 void Scene::addObject(const float* data, size_t size, int stride) {
@@ -119,6 +185,17 @@ void Scene::clearObjects() {
     m_FireflyPtrs.clear();
     m_FireflyBasePositions.clear();
     m_FireflyBodyPtrs.clear();
+
+    m_Sun = nullptr;
+    m_Mercury = nullptr;
+    m_Venus = nullptr;
+    m_Earth = nullptr;
+    m_Moon = nullptr;
+    m_Mars = nullptr;
+    m_Jupiter = nullptr;
+    m_Saturn = nullptr;
+    m_Uranus = nullptr;
+    m_Neptune = nullptr;
 
     m_GameTargets.clear();
     m_Score = 0;
@@ -179,13 +256,6 @@ void Scene::render() const {
     glDisable(GL_STENCIL_TEST);
 }
 
-extern float earthOrbitAngle;
-extern float moonOrbitAngle;
-extern float SCALE_EARTH;
-extern float SCALE_MOON;
-extern float EARTH_SUN_DISTANCE;
-extern float MOON_EARTH_DISTANCE;
-
 void Scene::update(float deltaTime, int currentSceneIndex) {
 
     if (m_FlashlightOn) {
@@ -202,28 +272,59 @@ void Scene::update(float deltaTime, int currentSceneIndex) {
     }
 
     if (currentSceneIndex == 2) {
-        const float EARTH_ORBIT_SPEED_RAD = 0.5f;
-        const float MOON_ORBIT_SPEED_RAD = 2.0f;
+        if (!m_Sun) {
+            if (objects.empty()) initSolarSystem();
+            return;
+        }
 
-        if (objects.size() < 3) return;
-        DrawableObject* earth = objects[1].get();
-        DrawableObject* moon = objects[2].get();
-        if (!earth || !moon) return;
+        float distances[] = { 4.0f, 6.0f, 8.0f, 11.0f, 16.0f, 21.0f, 26.0f, 31.0f };
+        float sizes[] = { 0.3f, 0.45f, 0.5f, 0.4f,  1.5f,  1.3f,  0.9f,  0.9f };
+        float speeds[] = { 1.5f, 1.2f, 1.0f, 0.8f,  0.4f,  0.3f,  0.2f,  0.1f };
 
-        earthOrbitAngle += EARTH_ORBIT_SPEED_RAD * deltaTime;
-        moonOrbitAngle += MOON_ORBIT_SPEED_RAD * deltaTime;
+        float rotationFactor = 0.5f;
+        m_SelfRotationAngle += rotationFactor * deltaTime;
 
-        earth->getTransformation().reset();
-        earth->getTransformation().rotate(earthOrbitAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-        earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
-        earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
+        for (int i = 0; i < 8; ++i) {
+            m_OrbitAngles[i] += speeds[i] * deltaTime;
+        }
+        m_MoonOrbitAngle += 3.0f * deltaTime;
 
-        moon->getTransformation().reset();
-        moon->getTransformation().rotate(earthOrbitAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-        moon->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
-        moon->getTransformation().rotate(moonOrbitAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-        moon->getTransformation().translate(glm::vec3(MOON_EARTH_DISTANCE, 0.0f, 0.0f));
-        moon->getTransformation().scale(glm::vec3(SCALE_MOON));
+        // Slunce
+        m_Sun->getTransformation().reset();
+        m_Sun->getTransformation().scale(glm::vec3(2.5f));
+        m_Sun->getTransformation().rotate(m_SelfRotationAngle * 0.2f, glm::vec3(0, 1, 0));
+
+        auto updatePlanet = [&](int idx, DrawableObject* p) {
+            if (!p) return;
+            p->getTransformation().reset();
+            // Orbit
+            p->getTransformation().rotate(m_OrbitAngles[idx], glm::vec3(0, 1, 0));
+            p->getTransformation().translate(glm::vec3(distances[idx], 0, 0));
+            // Rotace planety
+            p->getTransformation().rotate(m_SelfRotationAngle, glm::vec3(0, 1, 0));
+            // Scale
+            p->getTransformation().scale(glm::vec3(sizes[idx]));
+            };
+
+        updatePlanet(0, m_Mercury);
+        updatePlanet(1, m_Venus);
+        updatePlanet(2, m_Earth);
+        updatePlanet(3, m_Mars);
+        updatePlanet(4, m_Jupiter);
+        updatePlanet(5, m_Saturn);
+        updatePlanet(6, m_Uranus);
+        updatePlanet(7, m_Neptune);
+
+        // Mesic
+        if (m_Earth && m_Moon) {
+            m_Moon->getTransformation().reset();
+            m_Moon->getTransformation().rotate(m_OrbitAngles[2], glm::vec3(0, 1, 0));
+            m_Moon->getTransformation().translate(glm::vec3(distances[2], 0, 0));
+            m_Moon->getTransformation().rotate(m_MoonOrbitAngle, glm::vec3(0, 1, 0));
+            m_Moon->getTransformation().translate(glm::vec3(1.2f, 0, 0));
+            m_Moon->getTransformation().rotate(glm::radians(90.0f), glm::vec3(0, 1, 0));
+            m_Moon->getTransformation().scale(glm::vec3(0.15f));
+        }
     }
 
     if (currentSceneIndex == 3 || currentSceneIndex == 4) {
@@ -286,7 +387,6 @@ void Scene::initGameMaterials() {
         m_BushMaterial = std::make_shared<Material>();
         m_BushMaterial->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
         m_BushMaterial->ambient = glm::vec3(0.1f, 0.3f, 0.1f);
-        // Pridani speculacni slozky (odlesk), trochu mene nez stromy
         m_BushMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
         m_BushMaterial->shininess = 16.0f;
     }
@@ -298,7 +398,6 @@ void Scene::initForest() {
     for (int i = 0; i < 60; ++i) {
         float x = (rand() % (2 * range)) - range;
         float z = (rand() % (2 * range)) - range;
-        // Vynechani stredu
         if (abs(x) < 5 && abs(z) < 5) continue;
         addTreeAt(glm::vec3(x, 0.0f, z), 0.8f + (rand() % 50) / 100.0f);
     }

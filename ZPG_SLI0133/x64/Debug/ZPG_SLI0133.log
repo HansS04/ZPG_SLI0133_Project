@@ -9,13 +9,13 @@ D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8): warning 
       D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8):
       see declaration of 'Material'
   
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(88,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(98,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(108,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(306,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(307,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(314,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(315,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(533,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(553,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(154,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(164,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(174,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(399,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(400,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(406,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(407,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(624,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(644,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
   ZPG_SLI0133.vcxproj -> D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\x64\Debug\ZPG_SLI0133.exe

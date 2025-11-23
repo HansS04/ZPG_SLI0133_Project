@@ -110,7 +110,8 @@ Application::Application(int width, int height, const std::string& title)
     glViewport(0, 0, width, height);
 
     setupScenes();
-    loadScene(4);
+    // Start with Scene 2 (Solar System)
+    loadScene(2);
 
     m_Render = std::make_unique<Render>(*this);
 }
@@ -141,7 +142,7 @@ void Application::size_callback(GLFWwindow* window, int width, int height) {
 void Application::setupScenes() {
     sceneInitializers.push_back([this](Scene* s) { setupScene0(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene1(s); });
-    sceneInitializers.push_back([this](Scene* s) { setupScene2(s); });
+    sceneInitializers.push_back([this](Scene* s) { setupScene2(s); }); // Solar System
     sceneInitializers.push_back([this](Scene* s) { setupScene3(s); });
     sceneInitializers.push_back([this](Scene* s) { setupScene4(s); });
 }
@@ -227,48 +228,34 @@ void Application::setupScene1(Scene* scene) {
     scene->getCamera().updateMatrices();
 }
 
-float SCALE_EARTH = 1.2f;
-float SCALE_MOON = SCALE_EARTH / 5.0f;
-float EARTH_SUN_DISTANCE = 15.0f;
-float MOON_EARTH_DISTANCE = 2.4f;
-float earthOrbitAngle = 0.0f;
-float moonOrbitAngle = 0.0f;
+extern float earthOrbitAngle;
+extern float moonOrbitAngle;
 
+// --- UPRAVENA SCENA 2 PRO SOLRNI SYSTEM ---
 void Application::setupScene2(Scene* scene) {
     scene->clearObjects();
+
+    // Tmavsi ambientni svetlo pro vesmir
     scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-    auto sunMaterial = std::make_shared<Material>();
-    sunMaterial->diffuse = glm::vec3(1.0f, 1.0f, 0.6f);
-    auto earthMaterial = std::make_shared<Material>();
-    earthMaterial->diffuse = glm::vec3(0.0f, 0.0f, 0.8f);
-    earthMaterial->specular = glm::vec3(0.5f, 0.5f, 0.5f);
-    earthMaterial->shininess = 32.0f;
-    auto moonMaterial = std::make_shared<Material>();
-    moonMaterial->diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
-    moonMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
-    moonMaterial->shininess = 8.0f;
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
-    DrawableObject* sun = scene->getObject(scene->getObjectCount() - 1);
-    sun->setMaterial(sunMaterial);
-    sun->setUnlit(true);
-    sun->getTransformation().scale(glm::vec3(2.5f));
-    sun->getTransformation().translate(glm::vec3(0.0f, 0.0f, 0.0f));
-    scene->addPointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(10.0f, 10.0f, 10.0f), 1.0f, 0.007f, 0.0002f);
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
-    DrawableObject* earth = scene->getObject(scene->getObjectCount() - 1);
-    earth->setMaterial(earthMaterial);
-    earth->getTransformation().scale(glm::vec3(SCALE_EARTH));
-    earth->getTransformation().translate(glm::vec3(EARTH_SUN_DISTANCE, 0.0f, 0.0f));
-    scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
-    DrawableObject* moon = scene->getObject(scene->getObjectCount() - 1);
-    moon->setMaterial(moonMaterial);
-    moon->getTransformation().scale(glm::vec3(SCALE_MOON));
-    moon->getTransformation().translate(glm::vec3(MOON_EARTH_DISTANCE, 0.0f, 0.0f));
-    scene->getCamera().setPosition(glm::vec3(EARTH_SUN_DISTANCE + 5.0f, 3.0f, 5.0f));
-    scene->getCamera().setFi(glm::radians(-180.0f));
-    scene->getCamera().setAlpha(glm::radians(-10.0f));
+
+    // Skybox pro hvezdy (pokud mate skybox textury nactene v InitSkybox)
+
+    // Zavolame vytvoreni planet (definovano v Scene.cpp)
+    scene->initSolarSystem();
+
+    // Nastaveni kamery "Super angle" - vysoko a daleko, pohled na celou soustavu
+    // Pozice: X=0, Y=40 (vyska), Z=60 (dalka)
+    scene->getCamera().setPosition(glm::vec3(0.0f, 40.0f, 60.0f));
+
+    // Fi = -90 stupnu (kouka smerem k -Z, tedy dopredu do hloubky)
+    scene->getCamera().setFi(glm::radians(-90.0f));
+
+    // Alpha = -30 stupnu (kouka sikmo dolu na rovinu orbit)
+    scene->getCamera().setAlpha(glm::radians(-30.0f));
+
     scene->getCamera().updateMatrices();
 }
+
 void Application::setupScene3(Scene* scene) {
     scene->clearObjects();
 
