@@ -1,4 +1,4 @@
-#include "Application.h"
+﻿#include "Application.h"
 #include "Scene.h"
 #include "DrawableObject.h" 
 #include "InputController.h" 
@@ -150,7 +150,7 @@ void Application::loadScene(int index) {
     if (index >= 0 && index < sceneInitializers.size()) {
         scene = std::make_unique<Scene>();
 
-        if (index == 4) {
+        if (index == 3 || index == 4) {
             scene->createShaders("basic_vertexShader.vert", "basic_Blinn_fragmentShader.frag");
         }
         else {
@@ -269,21 +269,153 @@ void Application::setupScene2(Scene* scene) {
     scene->getCamera().setAlpha(glm::radians(-10.0f));
     scene->getCamera().updateMatrices();
 }
-
 void Application::setupScene3(Scene* scene) {
-    // Puvodni scena 3 (ted prazdna nebo puvodni obsah)
     scene->clearObjects();
-    scene->InitSkybox();
-    scene->setAmbientLight(glm::vec3(0.1f, 0.1f, 0.1f));
-    scene->getCamera().setPosition(glm::vec3(0.0f, 1.0f, 3.0f));
+
+    // Naètení textur a materiálù
+    auto mat_grass = std::make_shared<Material>();
+    mat_grass->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_grass->specular = glm::vec3(0.0f, 0.0f, 0.0f);
+    mat_grass->shininess = 16.0f;
+    mat_grass->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/grass.png");
+
+    auto mat_swamp = std::make_shared<Material>();
+    mat_swamp->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_swamp->specular = glm::vec3(0.2f, 0.2f, 0.1f);
+    mat_swamp->shininess = 8.0f;
+    mat_swamp->diffuseTextureID = TextureLoader::LoadTexture("assets/multipletexture/mud.jpg");
+
+    auto mat_shrek = std::make_shared<Material>();
+    mat_shrek->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_shrek->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_shrek->shininess = 32.0f;
+    mat_shrek->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/shrek.png");
+
+    auto mat_fiona = std::make_shared<Material>();
+    mat_fiona->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_fiona->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_fiona->shininess = 32.0f;
+    mat_fiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
+
+    auto mat_toilet = std::make_shared<Material>();
+    mat_toilet->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_toilet->specular = glm::vec3(0.8f, 0.8f, 0.8f);
+    mat_toilet->shininess = 128.0f;
+    mat_toilet->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/toiled.jpg");
+
+    auto mat_tree = std::make_shared<Material>();
+    mat_tree->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+    mat_tree->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
+    mat_tree->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+    mat_tree->shininess = 16.0f;
+
+    auto mat_firefly_body = std::make_shared<Material>();
+    mat_firefly_body->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    auto mat_skydome = std::make_shared<Material>();
+    mat_skydome->diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+    mat_skydome->diffuseTextureID = TextureLoader::LoadTexture("assets/sky/skydome.png");
+
+    scene->setAmbientLight(glm::vec3(0.02f, 0.02f, 0.05f));
+    scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.1f, 0.1f, 0.15f));
+
+    const float sceneSize = 50.0f;
+    const float swampSize = 10.0f;
+    const float treeScale = 0.5f;
+
+    scene->addObject(plain, sizeof(plain), 8);
+    DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
+    ground->setMaterial(mat_grass);
+    ground->getTransformation().scale(glm::vec3(sceneSize / 2.0f));
+
+    scene->addObject(plain, sizeof(plain), 8);
+    DrawableObject* swamp = scene->getObject(scene->getObjectCount() - 1);
+    swamp->setMaterial(mat_swamp);
+    swamp->getTransformation()
+        .scale(glm::vec3(swampSize / 2.0f))
+        .translate(glm::vec3(0.0f, 0.01f, 0.0f));
+
+    scene->addObject("assets/shrek/shrek.obj");
+    DrawableObject* shrek = scene->getObject(scene->getObjectCount() - 1);
+    shrek->setMaterial(mat_shrek);
+    shrek->getTransformation()
+        .translate(glm::vec3(-1.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f))
+        .addMatrix20();//Transformation 
+
+    scene->addObject("assets/shrek/fiona.obj");
+    DrawableObject* fiona = scene->getObject(scene->getObjectCount() - 1);
+    fiona->setMaterial(mat_fiona);
+    fiona->getTransformation()
+        .translate(glm::vec3(1.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f));
+
+    scene->addObject("assets/shrek/toiled.obj");
+    DrawableObject* toilet = scene->getObject(scene->getObjectCount() - 1);
+    toilet->setMaterial(mat_toilet);
+    toilet->getTransformation()
+        .translate(glm::vec3(0.0f, 0.02f, 0.0f))
+        .scale(glm::vec3(0.5f));
+
+    scene->addObject("assets/sky/skydome.obj");
+    DrawableObject* skydome = scene->getObject(scene->getObjectCount() - 1);
+    skydome->setMaterial(mat_skydome);
+    skydome->setUnlit(true);
+    skydome->getTransformation().scale(glm::vec3(sceneSize * 0.8f));
+
+    const int numTrees = 150;
+    std::uniform_real_distribution<float> randPos(-sceneSize / 2.0f, sceneSize / 2.0f);
+
+    for (int i = 0; i < numTrees; ++i) {
+        float x = randPos(m_RandomEngine);
+        float z = randPos(m_RandomEngine);
+
+        if (std::abs(x) < (swampSize / 2.0f + 1.0f) && std::abs(z) < (swampSize / 2.0f + 1.0f)) {
+            continue;
+        }
+
+        scene->addObject(tree, TREE_DATA_SIZE, 6);
+        DrawableObject* treeObj = scene->getObject(scene->getObjectCount() - 1);
+        treeObj->setMaterial(mat_tree);
+        treeObj->getTransformation()
+            .translate(glm::vec3(x, 0.0f, z))
+            .scale(glm::vec3(treeScale));
+    }
+
+    const int numFireflies = 15;
+    const glm::vec3 fireflyLightColor = glm::vec3(1.0f, 1.2f, 0.5f);
+    const float con = 1.0f;
+    const float lin = 1.0f;
+    const float quad = 2.0f;
+    std::uniform_real_distribution<float> randEdge(-swampSize / 2.0f, swampSize / 2.0f);
+    std::uniform_real_distribution<float> randY_dist(0.5f, 2.0f);
+    std::uniform_int_distribution<int> randSide(0, 3);
+
+    for (int i = 0; i < numFireflies; ++i) {
+        float x = 0.0f, z = 0.0f;
+        int side = randSide(m_RandomEngine);
+        if (side == 0) { x = -swampSize / 2.0f; z = randEdge(m_RandomEngine); }
+        else if (side == 1) { x = swampSize / 2.0f; z = randEdge(m_RandomEngine); }
+        else if (side == 2) { z = -swampSize / 2.0f; x = randEdge(m_RandomEngine); }
+        else { z = swampSize / 2.0f; x = randEdge(m_RandomEngine); }
+        float y = randY_dist(m_RandomEngine);
+
+        scene->addFirefly(glm::vec3(x, y, z), fireflyLightColor, con, lin, quad);
+
+        scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
+        DrawableObject* fireflyBody = scene->getObject(scene->getObjectCount() - 1);
+        fireflyBody->setMaterial(mat_firefly_body);
+        fireflyBody->setUnlit(true);
+        scene->addFireflyBody(fireflyBody);
+    }
+
+    scene->getCamera().setPosition(glm::vec3(0.0f, 3.0f, 15.0f));
 }
 
-// --- HERNI SCENA 4 ---
 void Application::setupScene4(Scene* scene) {
     scene->clearObjects();
     scene->initGameMaterials();
 
-    // Zadost o nick
     std::string nick;
     std::cout << "\n========================================" << std::endl;
     std::cout << "Zadejte svuj NICK pro start hry: ";
@@ -302,30 +434,26 @@ void Application::setupScene4(Scene* scene) {
     mat_skydome->diffuseTextureID = TextureLoader::LoadTexture("assets/sky/skydome.png");
 
     auto mat_firefly = std::make_shared<Material>();
-    mat_firefly->diffuse = glm::vec3(1.0f, 1.0f, 0.5f); // Zluta
+    mat_firefly->diffuse = glm::vec3(1.0f, 1.0f, 0.5f);
 
-    scene->setAmbientLight(glm::vec3(0.15f, 0.15f, 0.25f)); // Nocni nadech
+    scene->setAmbientLight(glm::vec3(0.15f, 0.15f, 0.25f));
     scene->addDirLight(glm::vec3(-0.2f, -1.0f, -0.3f), glm::vec3(0.4f, 0.4f, 0.5f));
 
-    const float sceneSize = 80.0f; // VETSI PLOCHA
+    const float sceneSize = 80.0f;
 
-    // Podlaha
     scene->addObject(plain, sizeof(plain), 8);
     DrawableObject* ground = scene->getObject(scene->getObjectCount() - 1);
     ground->setMaterial(mat_grass);
     ground->getTransformation().scale(glm::vec3(sceneSize));
 
-    // Obloha
     scene->addObject("assets/sky/skydome.obj");
     DrawableObject* skydome = scene->getObject(scene->getObjectCount() - 1);
     skydome->setMaterial(mat_skydome);
     skydome->setUnlit(true);
     skydome->getTransformation().scale(glm::vec3(sceneSize * 1.2f));
 
-    // Generovani statickeho lesa (stromy a kere)
     scene->initForest();
 
-    // Pridani svetlusek (Point Lights + male modely)
     const int numFireflies = 10;
     for (int i = 0; i < numFireflies; ++i) {
         float x = (std::rand() % 40) - 20.0f;
@@ -334,12 +462,11 @@ void Application::setupScene4(Scene* scene) {
 
         scene->addFirefly(glm::vec3(x, y, z), glm::vec3(1.0f, 0.8f, 0.2f), 1.0f, 0.7f, 1.8f);
 
-        // Model pro svetlusku (mala sfera)
         scene->addObject(sphere, SPHERE_VERTICES_SIZE, 6);
         DrawableObject* ffBody = scene->getObject(scene->getObjectCount() - 1);
         ffBody->setMaterial(mat_firefly);
         ffBody->setUnlit(true);
-        ffBody->getTransformation().translate(glm::vec3(x, y, z)).scale(glm::vec3(0.1f));
+        ffBody->getTransformation().translate(glm::vec3(x, y, z)).scale(glm::vec3(0.15f));
 
         scene->addFireflyBody(ffBody);
     }

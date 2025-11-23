@@ -1,2 +1,21 @@
-﻿  Model.cpp
+﻿  Scene.cpp
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\ShaderProgram.h(13,8): warning C4099: 'Material': type name first seen using 'class' now seen using 'struct'
+  (compiling source file 'Scene.cpp')
+      D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.h(17,7):
+      see declaration of 'Material'
+  
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8): warning C4099: 'Material': type name first seen using 'class' now seen using 'struct'
+  (compiling source file 'Scene.cpp')
+      D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Material.h(5,8):
+      see declaration of 'Material'
+  
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(88,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(98,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(108,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(306,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(307,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(314,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(315,17): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(533,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\ZPG_SLI0133\Scene.cpp(553,16): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
   ZPG_SLI0133.vcxproj -> D:\school\3_rocnik\ZPG\Project\ZPG_SLI0133\x64\Debug\ZPG_SLI0133.exe

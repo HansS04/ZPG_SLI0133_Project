@@ -16,17 +16,16 @@ class PointLight;
 class SpotLight;
 class Material;
 
-// Struktura pro herni cil (Shrek/Fiona)
 struct GameTarget {
     unsigned int objectID;
-    float t;                // Parametr pohybu (0 az 2)
-    float speed;            // Rychlost
-    glm::vec3 pointA;       // Start (dole)
-    glm::vec3 pointB;       // Vrchol (nahore)
-    glm::vec3 pointC;       // Konec (dole)
-    int pointsValue;        // Hodnota bodu
-    bool isHit;             // Zasah
-    float currentRotation;  // Aktualni rotace
+    float t;                // Parame. of movement (0 - 2)
+    float speed;            // Speed
+    glm::vec3 pointA;       // Start
+    glm::vec3 pointB;       // Up
+    glm::vec3 pointC;       // End (down)
+    int pointsValue;        // Value of point
+    bool isHit;             // Hit detect
+	float currentRotation;  // Actual rotation
 };
 
 class Scene
@@ -39,7 +38,6 @@ public:
     void addObject(const float* data, size_t size, int stride);
     void addObject(const char* modelName);
 
-    // Pridani herniho objektu (vraci pointer pro manipulaci)
     DrawableObject* addGameObject(const char* modelName);
 
     void clearObjects();
@@ -62,16 +60,16 @@ public:
     void DrawSkybox(glm::mat4 viewMatrix, glm::mat4 projectionMatrix) const;
 
     void selectObjectByID(unsigned int id);
-    void addTreeAt(glm::vec3 position, float scale);
-    void addBushAt(glm::vec3 position, float scale);
+    void addTreeAt(glm::vec3 position, float scale = 0.5f);
+    void addBushAt(glm::vec3 position, float scale = 0.5f);
     DrawableObject* getObjectByID(unsigned int id);
 
-    // --- HERNI METODY ---
+    // --- Game methods ---
     void setPlayerName(std::string name);
-    void initGameMaterials(); // Pripravi materialy
-    void initForest();        // Vygeneruje staticky les
-    void spawnGameTarget();   // Vytvori krtka
-    void updateGame(float deltaTime); // Logika hry
+	void initGameMaterials(); // Init. materils for game targets
+	void initForest();        // Generate static forest
+	void spawnGameTarget();   // Create new target (Shrek and Fiona)
+    void updateGame(float deltaTime); // Game Logic
     void hitObject(unsigned int id);  // Zasah
 
 private:
@@ -85,7 +83,6 @@ private:
     bool m_FlashlightOn;
     glm::vec3 m_AmbientLightColor;
 
-    // Svetlusky
     float m_FireflyTime;
     std::vector<PointLight*> m_FireflyPtrs;
     std::vector<glm::vec3> m_FireflyBasePositions;
@@ -97,13 +94,12 @@ private:
 
     size_t m_ObjectCounter = 0;
 
-    // Materialy (cache)
     std::shared_ptr<Material> m_TreeMaterial;
     std::shared_ptr<Material> m_BushMaterial;
     std::shared_ptr<Material> m_MatShrek;
     std::shared_ptr<Material> m_MatFiona;
 
-    // Herni promenne
+	// Game variables
     std::vector<GameTarget> m_GameTargets;
     float m_SpawnTimer = 0.0f;
     int m_Score = 0;

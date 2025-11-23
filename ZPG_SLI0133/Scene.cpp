@@ -8,7 +8,7 @@
 #include "Light.h"
 #include "TextureLoader.h" 
 #include "tree.h"
-#include "bushes.h" // Predpokladam existenci bushes.h
+#include "bushes.h"
 #include "Material.h" 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
@@ -226,14 +226,11 @@ void Scene::update(float deltaTime, int currentSceneIndex) {
         moon->getTransformation().scale(glm::vec3(SCALE_MOON));
     }
 
-    // Update pro herni scenu (4)
-    if (currentSceneIndex == 4) {
-        // Pohyb svetlusek
+    if (currentSceneIndex == 3 || currentSceneIndex == 4) {
         m_FireflyTime += deltaTime * 0.5f;
         for (size_t i = 0; i < m_FireflyPtrs.size(); ++i) {
             glm::vec3 basePos = m_FireflyBasePositions[i];
             glm::vec3 offset;
-            // Nahodny pohyb svetlusek
             offset.x = sin(m_FireflyTime + i * 2.1f) * 2.0f;
             offset.y = cos(m_FireflyTime + i * 1.7f) * 1.0f;
             offset.z = sin(m_FireflyTime + i * 0.8f) * 2.0f;
@@ -244,11 +241,14 @@ void Scene::update(float deltaTime, int currentSceneIndex) {
             if (i < m_FireflyBodyPtrs.size()) {
                 m_FireflyBodyPtrs[i]->getTransformation().reset();
                 m_FireflyBodyPtrs[i]->getTransformation().translate(newPos);
-                m_FireflyBodyPtrs[i]->getTransformation().scale(glm::vec3(0.1f)); // Mala svetluska
+
+                float scale = (currentSceneIndex == 3) ? 0.03f : 0.15f;
+                m_FireflyBodyPtrs[i]->getTransformation().scale(glm::vec3(scale));
             }
         }
+    }
 
-        // Herni logika
+    if (currentSceneIndex == 4) {
         updateGame(deltaTime);
     }
 }
@@ -274,32 +274,36 @@ void Scene::initGameMaterials() {
         m_MatFiona->shininess = 32.0f;
         m_MatFiona->diffuseTextureID = TextureLoader::LoadTexture("assets/shrek/fiona.png");
     }
+
     if (!m_TreeMaterial) {
         m_TreeMaterial = std::make_shared<Material>();
         m_TreeMaterial->diffuse = glm::vec3(0.2f, 0.5f, 0.2f);
         m_TreeMaterial->ambient = glm::vec3(0.1f, 0.3f, 0.1f);
+        m_TreeMaterial->specular = glm::vec3(0.2f, 0.2f, 0.2f);
+        m_TreeMaterial->shininess = 32.0f;
     }
     if (!m_BushMaterial) {
         m_BushMaterial = std::make_shared<Material>();
         m_BushMaterial->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_BushMaterial->ambient = glm::vec3(0.1f, 0.3f, 0.1f);
+        // Pridani speculacni slozky (odlesk), trochu mene nez stromy
+        m_BushMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_BushMaterial->shininess = 16.0f;
     }
 }
 
 void Scene::initForest() {
-    // Staticke generovani stromu a keru po plose
-    int range = 35; // Velikost lesa
+    int range = 35;
 
-    for (int i = 0; i < 60; ++i) { // 60 stromu
+    for (int i = 0; i < 60; ++i) {
         float x = (rand() % (2 * range)) - range;
         float z = (rand() % (2 * range)) - range;
-
-        // Nechceme stromy uplne uprostred, kde se spawnuje nejvic
+        // Vynechani stredu
         if (abs(x) < 5 && abs(z) < 5) continue;
-
         addTreeAt(glm::vec3(x, 0.0f, z), 0.8f + (rand() % 50) / 100.0f);
     }
 
-    for (int i = 0; i < 40; ++i) { // 40 keru
+    for (int i = 0; i < 40; ++i) {
         float x = (rand() % (2 * range)) - range;
         float z = (rand() % (2 * range)) - range;
         addBushAt(glm::vec3(x, 0.0f, z), 0.5f + (rand() % 50) / 100.0f);
@@ -309,7 +313,6 @@ void Scene::initForest() {
 void Scene::spawnGameTarget() {
     if (!m_GameRunning || m_GameFinished) return;
 
-    // Vetsi rozsah pro spawn (les)
     float randomX = (std::rand() % 50 - 25) * 1.0f;
     float randomZ = (std::rand() % 40 - 20) * 1.0f;
 
@@ -325,15 +328,14 @@ void Scene::spawnGameTarget() {
         newObj->setMaterial(m_MatFiona);
     }
 
-    // Startovaci a koncove body (zapadnuti do zeme)
     glm::vec3 A = glm::vec3(randomX, -4.0f, randomZ);
-    glm::vec3 B = glm::vec3(randomX, 2.0f, randomZ); // Vyskoci vys
+    glm::vec3 B = glm::vec3(randomX, 2.0f, randomZ);
     glm::vec3 C = glm::vec3(randomX + (isShrek ? 3.0f : -3.0f), -4.0f, randomZ);
 
     GameTarget target;
     target.objectID = newObj->getID();
     target.t = 0.0f;
-    target.speed = 0.8f + (std::rand() % 120) / 100.0f; // Nahodna rychlost
+    target.speed = 0.8f + (std::rand() % 120) / 100.0f;
     target.pointA = A;
     target.pointB = B;
     target.pointC = C;
@@ -341,10 +343,9 @@ void Scene::spawnGameTarget() {
     target.isHit = false;
     target.currentRotation = (float)(std::rand() % 360);
 
-    // Pocatecni nastaveni
     newObj->getTransformation().reset();
     newObj->getTransformation().translate(A);
-    newObj->getTransformation().scale(glm::vec3(2.0f)); // VETSI MODELY
+    newObj->getTransformation().scale(glm::vec3(2.0f));
     newObj->getTransformation().rotate(target.currentRotation, glm::vec3(0, 1, 0));
 
     m_GameTargets.push_back(target);
@@ -353,7 +354,6 @@ void Scene::spawnGameTarget() {
 void Scene::updateGame(float deltaTime) {
     if (m_GameFinished) return;
 
-    // Kontrola vitezstvi
     if (m_Score >= 100) {
         m_GameFinished = true;
         m_GameRunning = false;
@@ -365,7 +365,7 @@ void Scene::updateGame(float deltaTime) {
     }
 
     m_SpawnTimer += deltaTime;
-    float spawnInterval = 1.0f; // Rychlejsi spawn
+    float spawnInterval = 1.0f;
     if (m_SpawnTimer > spawnInterval) {
         spawnGameTarget();
         m_SpawnTimer = 0.0f;
@@ -378,7 +378,7 @@ void Scene::updateGame(float deltaTime) {
             tgt.t += tgt.speed * deltaTime;
         }
         else {
-            tgt.t += tgt.speed * deltaTime * 5.0f; // Po zasahu zmizi rychle
+            tgt.t += tgt.speed * deltaTime * 5.0f;
         }
 
         glm::vec3 currentPos;
@@ -401,21 +401,18 @@ void Scene::updateGame(float deltaTime) {
                 obj->getTransformation().scale(glm::vec3(0.5f));
             }
             else {
-                obj->getTransformation().scale(glm::vec3(2.0f)); // VETSI
+                obj->getTransformation().scale(glm::vec3(2.0f));
             }
             obj->getTransformation().rotate(tgt.currentRotation, glm::vec3(0, 1, 0));
         }
 
-        // Smazani objektu kdyz zajede zpet dolu (t > 2.0)
         if (tgt.t >= 2.0f) {
-            // Najdeme a smazeme z vykreslovaciho seznamu 'objects'
             for (auto oIt = objects.begin(); oIt != objects.end(); ++oIt) {
                 if ((*oIt)->getID() == tgt.objectID) {
-                    objects.erase(oIt); // Uvolni pamet (unique_ptr)
+                    objects.erase(oIt);
                     break;
                 }
             }
-            // Smazeme z herniho seznamu
             it = m_GameTargets.erase(it);
         }
         else {
@@ -433,7 +430,6 @@ void Scene::hitObject(unsigned int id) {
             tgt.isHit = true;
             m_Score += tgt.pointsValue;
 
-            // Vypis do konzole
             std::cout << "---------------------------------" << std::endl;
             std::cout << "Hrac: " << m_PlayerName << " | Skore: " << m_Score << std::endl;
             if (tgt.pointsValue > 0) std::cout << "-> Zasah SHREKA (+10)" << std::endl;
@@ -508,11 +504,20 @@ DrawableObject* Scene::getObjectByID(unsigned int id) {
 }
 
 void Scene::selectObjectByID(unsigned int id) {
-    // Volitelny debug
+    DrawableObject* selected = getObjectByID(id);
+    if (selected) {
+    }
 }
 
 void Scene::addTreeAt(glm::vec3 position, float scale) {
-    // Pridani stromu
+    if (!m_TreeMaterial) {
+        m_TreeMaterial = std::make_shared<Material>();
+        m_TreeMaterial->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_TreeMaterial->ambient = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_TreeMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_TreeMaterial->shininess = 16.0f;
+    }
+
     std::unique_ptr<Model> m = std::make_unique<Model>(tree, sizeof(tree), 6);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
 
@@ -525,7 +530,14 @@ void Scene::addTreeAt(glm::vec3 position, float scale) {
 }
 
 void Scene::addBushAt(glm::vec3 position, float scale) {
-    // Pridani kere
+    if (!m_BushMaterial) {
+        m_BushMaterial = std::make_shared<Material>();
+        m_BushMaterial->diffuse = glm::vec3(0.1f, 0.4f, 0.1f);
+        m_BushMaterial->ambient = glm::vec3(0.1f, 0.3f, 0.1f);
+        m_BushMaterial->specular = glm::vec3(0.1f, 0.1f, 0.1f);
+        m_BushMaterial->shininess = 16.0f;
+    }
+
     std::unique_ptr<Model> m = std::make_unique<Model>(bushes, sizeof(bushes), 6);
     std::unique_ptr<DrawableObject> obj = std::make_unique<DrawableObject>(std::move(m), colorShaderProgram);
 
